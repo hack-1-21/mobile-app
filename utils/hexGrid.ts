@@ -12,6 +12,11 @@ const SQ3 = Math.sqrt(3);
 const LNG_SCALE = 1 / Math.cos((35.68 * Math.PI) / 180);
 
 export const buildHexGrid = (data: SoundPoint[], hexSize: number): HexCell[] => {
+  // Validate hexSize parameter
+  if (!isFinite(hexSize) || hexSize <= 0) {
+    throw new Error(`Invalid hexSize: ${hexSize}. hexSize must be a positive finite number.`);
+  }
+
   const cells = new Map<
     string,
     { sum: number; count: number; centerLat: number; centerLng: number }

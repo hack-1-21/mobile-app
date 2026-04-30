@@ -1,7 +1,11 @@
 import { Region } from "react-native-maps";
 
-export const getZoomLevel = (region: Region) =>
-  Math.log2(360 / region.longitudeDelta);
+export const getZoomLevel = (region: Region) => {
+  if (region.longitudeDelta <= 0) {
+    throw new Error("longitudeDelta must be positive");
+  }
+  return Math.log2(360 / region.longitudeDelta);
+};
 
 export const getCellSize = (zoom: number) => {
   const size = 0.0008 * Math.pow(2, 14 - zoom);
