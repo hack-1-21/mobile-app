@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import MapView, { Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { darkMapStyle } from "../constants/mapStyle";
 import { DUMMY_SOUND_DATA } from "../data/dummySoundData";
-import { HexCell, buildHexGrid, hexVertices } from "../utils/hexGrid";
+import { buildHexGrid, HexCell, hexVertices } from "../utils/hexGrid";
 import { getCellSize, getZoomLevel, weightToColor } from "../utils/mapUtils";
 
 const INITIAL_CELL_SIZE = 0.005;
@@ -27,27 +27,29 @@ export default function App() {
   };
 
   return (
-    <MapView
-      style={StyleSheet.absoluteFillObject}
-      provider={PROVIDER_GOOGLE}
-      customMapStyle={darkMapStyle}
-      onRegionChangeComplete={handleRegionChange}
-      initialRegion={{
-        latitude: 35.6812,
-        longitude: 139.7671,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }}
-    >
-      {grid.map((cell) => (
-        <Polygon
-          key={cell.key}
-          coordinates={hexVertices(cell.centerLat, cell.centerLng, cellSize)}
-          fillColor={weightToColor(cell.weight)}
-          strokeWidth={0.5}
-          strokeColor="rgba(100,200,255,0.25)"
-        />
-      ))}
-    </MapView>
+    <View style={{ flex: 1 }}>
+      <MapView
+        style={StyleSheet.absoluteFillObject}
+        provider={PROVIDER_GOOGLE}
+        customMapStyle={darkMapStyle}
+        onRegionChangeComplete={handleRegionChange}
+        initialRegion={{
+          latitude: 35.6812,
+          longitude: 139.7671,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      >
+        {grid.map((cell) => (
+          <Polygon
+            key={cell.key}
+            coordinates={hexVertices(cell.centerLat, cell.centerLng, cellSize)}
+            fillColor={weightToColor(cell.weight)}
+            strokeWidth={0.5}
+            strokeColor="rgba(100,200,255,0.25)"
+          />
+        ))}
+      </MapView>
+    </View>
   );
 }

@@ -11,10 +11,12 @@ const SQ3 = Math.sqrt(3);
 // 東京付近(35°N)での経度補正: Mercator投影で1deg_lng ≈ cos(35°) * 1deg_lat
 const LNG_SCALE = 1 / Math.cos((35.68 * Math.PI) / 180);
 
+// 40dB(静寂) 〜 100dB(騒音) を 0〜1 に正規化
+const dbToWeight = (db: number) => Math.min(Math.max((db - 40) / 60, 0), 1);
+
 export const buildHexGrid = (data: SoundPoint[], hexSize: number): HexCell[] => {
-  // Validate hexSize parameter
   if (!isFinite(hexSize) || hexSize <= 0) {
-    throw new Error(`Invalid hexSize: ${hexSize}. hexSize must be a positive finite number.`);
+    throw new Error(`Invalid hexSize: ${hexSize}`);
   }
 
   const cells = new Map<
@@ -42,7 +44,12 @@ export const buildHexGrid = (data: SoundPoint[], hexSize: number): HexCell[] => 
     const centerLng = hexSize * SQ3 * LNG_SCALE * (q + r / 2);
 
     const prev = cells.get(key) ?? { sum: 0, count: 0, centerLat, centerLng };
-    cells.set(key, { sum: prev.sum + p.weight, count: prev.count + 1, centerLat, centerLng });
+    cells.set(key, {
+      sum: prev.sum + dbToWeight(p.db),
+      count: prev.count + 1,
+      centerLat,
+      centerLng,
+    });
   }
 
   return Array.from(cells.entries()).map(([key, val]) => ({
