@@ -1,10 +1,12 @@
+import FloatingButton from "@/components/FloatingButton";
+import PlayerHUD from "@/components/PlayerHUD";
 import React, { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
-import { darkMapStyle } from "../constants/mapStyle";
-import { DUMMY_SOUND_DATA } from "../data/dummySoundData";
-import { buildHexGrid, HexCell, hexVertices } from "../utils/hexGrid";
-import { getCellSize, getZoomLevel, weightToColor } from "../utils/mapUtils";
+import { darkMapStyle } from "../../constants/mapStyle";
+import { DUMMY_SOUND_DATA } from "../../data/dummySoundData";
+import { buildHexGrid, HexCell, hexVertices } from "../../utils/hexGrid";
+import { getCellSize, getZoomLevel, weightToColor } from "../../utils/mapUtils";
 
 const INITIAL_CELL_SIZE = 0.005;
 
@@ -50,6 +52,9 @@ export default function App() {
           />
         ))}
       </MapView>
+
+      <PlayerHUD nickname="explorer" level={7} xp={340} xpMax={500} points={12480} />
+      <FloatingButton label="+" />
     </View>
   );
 }
