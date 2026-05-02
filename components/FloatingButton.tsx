@@ -1,3 +1,4 @@
+import { colors } from "@/constants/tokens";
 import React from "react";
 import { GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -37,7 +38,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -45,12 +46,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   buttonDark: {
-    backgroundColor: "rgba(10, 12, 20, 0.82)",
-    borderColor: "rgba(100, 200, 255, 0.2)",
+    backgroundColor: colors.bgCardStrong,
+    borderColor: colors.primaryA20,
   },
   buttonLight: {
-    backgroundColor: "rgba(237, 232, 223, 0.92)",
-    borderColor: "rgba(92, 74, 58, 0.25)",
+    backgroundColor: "rgba(237,232,223,0.92)",
+    borderColor: "rgba(92,74,58,0.25)",
   },
   icon: {
     fontSize: 22,

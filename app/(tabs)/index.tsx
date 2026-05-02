@@ -1,6 +1,7 @@
 import FloatingButton from "@/components/FloatingButton";
 import MapOptionsDrawer, { MapOptions } from "@/components/MapOptionsDrawer";
 import PlayerHUD from "@/components/PlayerHUD";
+import { colors } from "@/constants/tokens";
 import React, { useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
@@ -115,7 +116,7 @@ export default function App() {
           <Polygon
             coordinates={fogOverlay.outer}
             holes={fogOverlay.holes}
-            fillColor="rgba(180, 200, 230, 0.62)"
+            fillColor={colors.fogFill}
             strokeWidth={0}
             strokeColor="transparent"
           />
@@ -128,20 +129,20 @@ export default function App() {
               coordinates={hexVertices(cell.centerLat, cell.centerLng, cellSize)}
               fillColor={weightToColor(cell.weight)}
               strokeWidth={0.5}
-              strokeColor="rgba(100,200,255,0.25)"
+              strokeColor={colors.hexStroke}
             />
           ))}
         {boundaryEdges.map((edge) => (
           <Polyline
             key={edge.key}
             coordinates={edge.coords}
-            strokeColor="rgba(65,115,215,0.85)"
+            strokeColor={colors.boundaryStroke}
             strokeWidth={2}
           />
         ))}
       </MapView>
 
-      <PlayerHUD nickname="explorer" level={7} xp={340} xpMax={500} points={12480} />
+      <PlayerHUD />
 
       {/* マップオプションボタン (右上) */}
       <TouchableOpacity
@@ -172,12 +173,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "rgba(10, 12, 20, 0.78)",
+    backgroundColor: colors.bgCard,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(100, 200, 255, 0.15)",
-    shadowColor: "#000",
+    borderColor: colors.primaryA15,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
@@ -186,6 +187,6 @@ const styles = StyleSheet.create({
   },
   optionsIcon: {
     fontSize: 18,
-    color: "#64C8FF",
+    color: colors.primary,
   },
 });

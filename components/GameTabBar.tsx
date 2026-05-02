@@ -1,11 +1,12 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { colors } from "@/constants/tokens";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TAB_LABELS: Record<string, string> = {
   index: "MAP",
-  sandbox: "箱庭",
+  hakoniwa: "箱庭",
   collection: "図鑑",
   settings: "設定",
 };
@@ -72,12 +73,12 @@ export function GameTabBar({ state, descriptors, navigation }: BottomTabBarProps
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: "rgba(6, 14, 32, 0.97)",
+    backgroundColor: colors.bgTabBar,
     borderTopWidth: 0,
   },
   scanLine: {
     height: 1,
-    backgroundColor: "rgba(100,200,255,0.18)",
+    backgroundColor: colors.primaryA18,
   },
   container: {
     flexDirection: "row",
@@ -88,8 +89,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     height: 2,
-    backgroundColor: "#64C8FF",
-    shadowColor: "#64C8FF",
+    backgroundColor: colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.9,
     shadowRadius: 8,
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
   },
   glowBg: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(100,200,255,0.07)",
+    backgroundColor: colors.primaryA07,
     borderRadius: 4,
   },
   tabLabel: {
@@ -118,9 +119,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   tabLabelActive: {
-    color: "#64C8FF",
+    color: colors.primary,
   },
   tabLabelInactive: {
-    color: "rgba(100,200,255,0.35)",
+    color: colors.primaryA35,
   },
 });

@@ -1,19 +1,18 @@
+import { colors, radius } from "@/constants/tokens";
+import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 type Props = {
-  nickname: string;
-  level: number;
-  xp: number;
-  xpMax: number;
-  points: number;
+  floating?: boolean;
 };
 
-export default function PlayerHUD({ nickname, level, xp, xpMax, points }: Props) {
+export default function PlayerHUD({ floating = true }: Props) {
+  const { nickname, level, xp, xpMax, points } = usePlayerProfile();
   const progress = Math.min(xp / xpMax, 1);
 
   return (
-    <View pointerEvents="none" style={styles.container}>
+    <View pointerEvents="none" style={floating ? styles.container : styles.containerInline}>
       <View style={styles.card}>
         {/* アイコン */}
         <View style={styles.avatar}>
@@ -55,28 +54,31 @@ const styles = StyleSheet.create({
     zIndex: 100,
     alignItems: "flex-start",
   },
+  containerInline: {
+    alignItems: "stretch",
+    padding: 16,
+  },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(10, 12, 20, 0.78)",
-    borderRadius: 14,
+    backgroundColor: colors.bgCard,
+    borderRadius: radius.lg,
     paddingHorizontal: 10,
     paddingVertical: 8,
     gap: 10,
-    // backdrop blur is not available in RN — use semi-transparent bg instead
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 8,
     borderWidth: 1,
-    borderColor: "rgba(100, 200, 255, 0.15)",
+    borderColor: colors.primaryA15,
   },
   avatar: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(100, 200, 255, 0.12)",
+    backgroundColor: colors.primaryA12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -93,49 +95,49 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   nickname: {
-    color: "#E8F4FF",
+    color: colors.textLight,
     fontSize: 13,
     fontWeight: "700",
     letterSpacing: 0.3,
     flexShrink: 1,
   },
   levelBadge: {
-    color: "#64C8FF",
+    color: colors.primary,
     fontSize: 11,
     fontWeight: "700",
-    backgroundColor: "rgba(100, 200, 255, 0.15)",
+    backgroundColor: colors.primaryA15,
     paddingHorizontal: 5,
     paddingVertical: 1,
-    borderRadius: 5,
+    borderRadius: radius.xs,
   },
   xpBarTrack: {
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: colors.whiteA10,
     overflow: "hidden",
   },
   xpBarFill: {
     height: "100%",
     borderRadius: 2,
-    backgroundColor: "#64C8FF",
+    backgroundColor: colors.primary,
   },
   divider: {
     width: 1,
     height: 28,
-    backgroundColor: "rgba(100, 200, 255, 0.2)",
+    backgroundColor: colors.primaryA20,
   },
   pointsBlock: {
     alignItems: "center",
     minWidth: 44,
   },
   pointsValue: {
-    color: "#FFD060",
+    color: colors.gold,
     fontSize: 14,
     fontWeight: "800",
     letterSpacing: 0.5,
   },
   pointsLabel: {
-    color: "rgba(255,208,96,0.6)",
+    color: colors.goldA60,
     fontSize: 9,
     fontWeight: "600",
     letterSpacing: 1,

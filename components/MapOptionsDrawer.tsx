@@ -1,3 +1,4 @@
+import { colors, radius } from "@/constants/tokens";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
@@ -78,9 +79,9 @@ function OptionRow({ label, description, value, onToggle }: OptionRowProps) {
       <Switch
         value={value}
         onValueChange={onToggle}
-        trackColor={{ false: "rgba(255,255,255,0.1)", true: "rgba(100,200,255,0.5)" }}
-        thumbColor={value ? "#64C8FF" : "#888"}
-        ios_backgroundColor="rgba(255,255,255,0.1)"
+        trackColor={{ false: colors.whiteA10, true: colors.primaryA50 }}
+        thumbColor={value ? colors.primary : colors.muted}
+        ios_backgroundColor={colors.whiteA10}
       />
     </View>
   );
@@ -89,42 +90,42 @@ function OptionRow({ label, description, value, onToggle }: OptionRowProps) {
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: colors.bgOverlay,
   },
   sheet: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#0D1525",
+    backgroundColor: colors.bgPanel,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: 34,
     paddingHorizontal: 20,
     borderTopWidth: 1,
-    borderColor: "rgba(100,200,255,0.15)",
+    borderColor: colors.primaryA15,
   },
   handle: {
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: colors.whiteA20,
     alignSelf: "center",
     marginTop: 12,
     marginBottom: 18,
   },
   title: {
-    color: "#E8F4FF",
+    color: colors.textLight,
     fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0.4,
     marginBottom: 16,
   },
   section: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 12,
+    backgroundColor: colors.whiteA04,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "rgba(100,200,255,0.1)",
+    borderColor: colors.primaryA10,
     overflow: "hidden",
     marginBottom: 20,
   },
@@ -139,29 +140,29 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   rowLabel: {
-    color: "#E8F4FF",
+    color: colors.textLight,
     fontSize: 14,
     fontWeight: "600",
   },
   rowDesc: {
-    color: "rgba(232,244,255,0.45)",
+    color: colors.textLightA45,
     fontSize: 11,
   },
   separator: {
     height: 1,
-    backgroundColor: "rgba(100,200,255,0.08)",
+    backgroundColor: colors.primaryA08,
     marginHorizontal: 16,
   },
   closeButton: {
-    backgroundColor: "rgba(100,200,255,0.12)",
-    borderRadius: 12,
+    backgroundColor: colors.primaryA12,
+    borderRadius: radius.md,
     paddingVertical: 13,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(100,200,255,0.2)",
+    borderColor: colors.primaryA20,
   },
   closeLabel: {
-    color: "#64C8FF",
+    color: colors.primary,
     fontSize: 14,
     fontWeight: "700",
     letterSpacing: 0.5,

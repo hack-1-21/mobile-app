@@ -1,3 +1,4 @@
+import { colors } from "@/constants/tokens";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -14,10 +15,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0a1428",
+    backgroundColor: colors.bgPage,
   },
   text: {
-    color: "#64C8FF",
+    color: colors.primary,
     fontSize: 24,
     letterSpacing: 2,
   },

@@ -1,3 +1,4 @@
+import { colors } from "@/constants/tokens";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -36,10 +37,10 @@ const styles = StyleSheet.create({
   control: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(10, 20, 40, 0.85)",
+    backgroundColor: colors.bgTimeControl,
     borderRadius: 32,
     borderWidth: 1,
-    borderColor: "rgba(100,200,255,0.3)",
+    borderColor: colors.primaryA30,
     paddingVertical: 8,
     paddingHorizontal: 4,
   },
@@ -50,13 +51,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   arrow: {
-    color: "rgba(100,200,255,0.9)",
+    color: colors.primaryA90,
     fontSize: 36,
     lineHeight: 40,
     fontWeight: "300",
   },
   time: {
-    color: "#ffffff",
+    color: colors.white,
     fontSize: 22,
     fontWeight: "600",
     letterSpacing: 2,
