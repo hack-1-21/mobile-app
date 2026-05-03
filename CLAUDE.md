@@ -64,6 +64,7 @@ Uses EAS (Expo Application Services). Profiles: `development`, `preview`, `produ
 ## Experimental Features
 
 Both are enabled in `app.json`:
+
 - **New Architecture** (React Native)
 - **React Compiler** (experimental)
 - **Typed Routes** (expo-router)

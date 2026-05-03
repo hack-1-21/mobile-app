@@ -1,12 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "import",
-    "react"
-  ],
-  "jsPlugins": [
-    "eslint-plugin-expo"
-  ],
+  "plugins": ["import", "react"],
+  "jsPlugins": ["eslint-plugin-expo"],
   "categories": {
     "correctness": "off"
   },
@@ -34,19 +29,13 @@
     "setImmediate": "readonly",
     "shared-node-browser": "writable"
   },
-  "ignorePatterns": [
-    "android/app/build",
-    "dist/*"
-  ],
+  "ignorePatterns": ["android/app/build", "dist/*"],
   "rules": {
     "import/namespace": "error",
     "import/no-named-as-default": "warn",
     "import/no-named-as-default-member": "warn",
     "import/no-duplicates": "warn",
-    "eqeqeq": [
-      "warn",
-      "smart"
-    ],
+    "eqeqeq": ["warn", "smart"],
     "no-dupe-class-members": "error",
     "no-dupe-keys": "error",
     "no-duplicate-case": "error",
@@ -75,10 +64,7 @@
       }
     ],
     "no-with": "warn",
-    "unicode-bom": [
-      "warn",
-      "never"
-    ],
+    "unicode-bom": ["warn", "never"],
     "use-isnan": "error",
     "valid-typeof": "error",
     "import/first": "warn",
@@ -98,33 +84,21 @@
     "react/no-unescaped-entities": "error",
     "react/no-unknown-property": "warn",
     "react/no-this-in-sfc": "warn",
-    "expo/use-dom-exports": [
-      "error"
-    ],
-    "expo/no-env-var-destructuring": [
-      "error"
-    ],
-    "expo/no-dynamic-env-var": [
-      "error"
-    ],
+    "expo/use-dom-exports": ["error"],
+    "expo/no-env-var-destructuring": ["error"],
+    "expo/no-dynamic-env-var": ["error"],
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn"
   },
   "overrides": [
     {
-      "files": [
-        "**/metro.config.js"
-      ],
+      "files": ["**/metro.config.js"],
       "env": {
         "node": true
       }
     },
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.d.ts"
-      ],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
       "rules": {
         "no-unused-vars": [
           "warn",
@@ -161,9 +135,7 @@
           }
         ]
       },
-      "plugins": [
-        "typescript"
-      ]
+      "plugins": ["typescript"]
     }
   ]
 }

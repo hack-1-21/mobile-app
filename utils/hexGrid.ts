@@ -60,6 +60,24 @@ export const buildHexGrid = (data: SoundPoint[], hexSize: number): HexCell[] => 
   }));
 };
 
+export const latLngToHexKey = (lat: number, lng: number, hexSize: number): string => {
+  const lngNorm = lng / LNG_SCALE;
+  const r_frac = (2 * lat) / (3 * hexSize);
+  const q_frac = lngNorm / (SQ3 * hexSize) - r_frac / 2;
+  const s_frac = -q_frac - r_frac;
+
+  let q = Math.round(q_frac);
+  let r = Math.round(r_frac);
+  let s = Math.round(s_frac);
+  const qd = Math.abs(q - q_frac);
+  const rd = Math.abs(r - r_frac);
+  const sd = Math.abs(s - s_frac);
+  if (qd > rd && qd > sd) q = -r - s;
+  else if (rd > sd) r = -q - s;
+
+  return `${q},${r}`;
+};
+
 export const hexVertices = (centerLat: number, centerLng: number, size: number) =>
   Array.from({ length: 6 }, (_, i) => {
     const angle = (Math.PI / 3) * i + Math.PI / 6;
