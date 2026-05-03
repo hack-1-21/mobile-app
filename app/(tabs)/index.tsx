@@ -1,11 +1,12 @@
 import FloatingButton from "@/components/FloatingButton";
 import MapOptionsDrawer, { MapOptions } from "@/components/MapOptionsDrawer";
 import PlayerHUD from "@/components/PlayerHUD";
+import { darkMapStyle, lightMapStyle } from "@/constants/mapStyle";
 import { colors } from "@/constants/tokens";
+import * as Location from "expo-location";
 import React, { useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
-import { darkMapStyle, lightMapStyle } from "../../constants/mapStyle";
 import { DUMMY_SOUND_DATA } from "../../data/dummySoundData";
 import { buildHexGrid, HexCell, hexVertices } from "../../utils/hexGrid";
 import { getCellSize, getZoomLevel, weightToColor } from "../../utils/mapUtils";
@@ -45,6 +46,22 @@ export default function App() {
   });
 
   const currentSizeRef = useRef(INITIAL_CELL_SIZE);
+  const mapRef = useRef<MapView>(null);
+
+  const handleMapReady = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") return;
+    const loc = await Location.getCurrentPositionAsync({});
+    mapRef.current?.animateToRegion(
+      {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: INITIAL_REGION.latitudeDelta,
+        longitudeDelta: INITIAL_REGION.longitudeDelta,
+      },
+      800,
+    );
+  };
 
   const handleRegionChange = (newRegion: Region) => {
     setRegion(newRegion);
@@ -101,16 +118,19 @@ export default function App() {
     return edges;
   }, [isDark, grid, exploredKeys, cellSize]);
 
-  const mapStyle = isDark ? darkMapStyle : lightMapStyle;
+  const mapStyle = isDark ? darkMapStyle: lightMapStyle;
 
   return (
     <View style={{ flex: 1 }}>
       <MapView
+        ref={mapRef}
         style={StyleSheet.absoluteFillObject}
         provider={PROVIDER_GOOGLE}
-        customMapStyle={mapStyle as any}
         onRegionChangeComplete={handleRegionChange}
+        onMapReady={handleMapReady}
         initialRegion={INITIAL_REGION}
+        showsUserLocation
+        customMapStyle={mapStyle}
       >
         {fogOverlay && (
           <Polygon

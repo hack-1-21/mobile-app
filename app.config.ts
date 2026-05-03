@@ -11,8 +11,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     infoPlist: {
       ...config.ios?.infoPlist,
-      NSLocationWhenInUseUsageDescription:
-        "現在地を地図上に表示するために使用します。",
     },
   },
   android: {

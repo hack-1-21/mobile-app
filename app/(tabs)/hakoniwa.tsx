@@ -1,6 +1,6 @@
 import PlayerHUD from "@/components/PlayerHUD";
 import { colors, radius } from "@/constants/tokens";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Hakoniwa() {
@@ -9,10 +9,10 @@ export default function Hakoniwa() {
       <PlayerHUD floating={false} />
 
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Image
+        {/* <Image
           source={require("/Users/harunaishii/workspace/hack-1-2026/sound-collect/assets/hakoniwa/image.png")}
           style={styles.image}
-        />
+        /> */}
         <TouchableOpacity onPress={() => {}} style={styles.button}>
           <Text>箱庭図鑑</Text>
         </TouchableOpacity>

@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { useMemo } from "react";
 
 export type PlayerProfile = {
@@ -8,14 +9,19 @@ export type PlayerProfile = {
   points: number;
 };
 
-const DEFAULT_PLAYER_PROFILE: PlayerProfile = {
-  nickname: "explorer",
-  level: 7,
-  xp: 340,
-  xpMax: 500,
-  points: 12480,
-};
+const XP_PER_LEVEL = 500;
 
-export function usePlayerProfile() {
-  return useMemo(() => DEFAULT_PLAYER_PROFILE, []);
+export function usePlayerProfile(): PlayerProfile {
+  const { user } = useAuth();
+
+  return useMemo(
+    () => ({
+      nickname: user?.nickname ?? "explorer",
+      level: user?.level ?? 1,
+      xp: user?.exp ?? 0,
+      xpMax: XP_PER_LEVEL,
+      points: user?.points ?? 0,
+    }),
+    [user],
+  );
 }
