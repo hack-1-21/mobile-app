@@ -4,10 +4,10 @@ import PlayerHUD from "@/components/PlayerHUD";
 import { darkMapStyle, lightMapStyle } from "@/constants/mapStyle";
 import { colors } from "@/constants/tokens";
 import * as Location from "expo-location";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
-import { DUMMY_SOUND_DATA } from "../../data/dummySoundData";
+import { useTiledSoundData } from "@/hooks/useTiledSoundData";
 import { buildHexGrid, HexCell, hexVertices } from "../../utils/hexGrid";
 import { getCellSize, getZoomLevel, weightToColor } from "../../utils/mapUtils";
 
@@ -30,15 +30,14 @@ const EDGE_NEIGHBORS: [number, number][] = [
 ];
 
 export default function App() {
-  const [{ grid, cellSize }, setHexState] = useState<{
-    grid: HexCell[];
-    cellSize: number;
-  }>(() => ({
-    grid: buildHexGrid(DUMMY_SOUND_DATA, INITIAL_CELL_SIZE),
-    cellSize: INITIAL_CELL_SIZE,
-  }));
-
+  const [grid, setGrid] = useState<HexCell[]>([]);
+  const [cellSize, setCellSize] = useState(INITIAL_CELL_SIZE);
   const [region, setRegion] = useState<Region>(INITIAL_REGION);
+  const soundData = useTiledSoundData(region);
+
+  useEffect(() => {
+    setGrid(buildHexGrid(soundData, cellSize));
+  }, [soundData, cellSize]);
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [isDark, setIsDark] = useState(true);
   const [mapOptions, setMapOptions] = useState<MapOptions>({
@@ -68,7 +67,7 @@ export default function App() {
     const size = getCellSize(getZoomLevel(newRegion));
     if (Math.abs(size - currentSizeRef.current) / currentSizeRef.current < 0.05) return;
     currentSizeRef.current = size;
-    setHexState({ grid: buildHexGrid(DUMMY_SOUND_DATA, size), cellSize: size });
+    setCellSize(size);
   };
 
   const handleOptionsChange = (next: Partial<MapOptions>) => {
@@ -118,7 +117,7 @@ export default function App() {
     return edges;
   }, [isDark, grid, exploredKeys, cellSize]);
 
-  const mapStyle = isDark ? darkMapStyle: lightMapStyle;
+  const mapStyle = isDark ? darkMapStyle : lightMapStyle;
 
   return (
     <View style={{ flex: 1 }}>
