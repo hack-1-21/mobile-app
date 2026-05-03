@@ -18,13 +18,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const { login, googleLogin } = useAuth();
+  const { login } = useAuth();
 
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!userId.trim() || !password) {
@@ -42,17 +41,17 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogle = async () => {
-    setError("");
-    setGoogleLoading(true);
-    try {
-      await googleLogin();
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Googleログインに失敗しました");
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
+  // const handleGoogle = async () => {
+  //   setError("");
+  //   setGoogleLoading(true);
+  //   try {
+  //     await googleLogin();
+  //   } catch (e) {
+  //     setError(e instanceof ApiError ? e.message : "Googleログインに失敗しました");
+  //   } finally {
+  //     setGoogleLoading(false);
+  //   }
+  // };
 
   return (
     <KeyboardAvoidingView
@@ -104,18 +103,6 @@ export default function LoginScreen() {
               <ActivityIndicator color={colors.bgPage} />
             ) : (
               <Text style={styles.btnPrimaryText}>ログイン</Text>
-            )}
-          </Pressable>
-
-          <Pressable
-            style={[styles.btn, styles.btnOutline]}
-            onPress={handleGoogle}
-            disabled={googleLoading}
-          >
-            {googleLoading ? (
-              <ActivityIndicator color={colors.primary} />
-            ) : (
-              <Text style={styles.btnOutlineText}>Googleでログイン</Text>
             )}
           </Pressable>
         </View>

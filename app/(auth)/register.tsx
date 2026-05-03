@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
-  const { register, googleLogin } = useAuth();
+  const { register } = useAuth();
 
   const [userId, setUserId] = useState("");
   const [nickname, setNickname] = useState("");
@@ -26,7 +26,6 @@ export default function RegisterScreen() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleRegister = async () => {
     if (!userId.trim() || !nickname.trim() || !password) {
@@ -49,18 +48,6 @@ export default function RegisterScreen() {
       setError(e instanceof ApiError ? e.message : "登録に失敗しました");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogle = async () => {
-    setError("");
-    setGoogleLoading(true);
-    try {
-      await googleLogin();
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Googleログインに失敗しました");
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -134,18 +121,6 @@ export default function RegisterScreen() {
               <ActivityIndicator color={colors.bgPage} />
             ) : (
               <Text style={styles.btnPrimaryText}>登録する</Text>
-            )}
-          </Pressable>
-
-          <Pressable
-            style={[styles.btn, styles.btnOutline]}
-            onPress={handleGoogle}
-            disabled={googleLoading}
-          >
-            {googleLoading ? (
-              <ActivityIndicator color={colors.primary} />
-            ) : (
-              <Text style={styles.btnOutlineText}>Googleで登録</Text>
             )}
           </Pressable>
         </View>
