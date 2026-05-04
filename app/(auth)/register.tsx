@@ -1,6 +1,7 @@
 import { ApiError } from "@/constants/api";
 import { colors, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -23,17 +24,13 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     if (!email.trim() || !nickname.trim() || !password) {
       setError("すべての項目を入力してください");
-      return;
-    }
-    if (password !== passwordConfirm) {
-      setError("パスワードが一致しません");
       return;
     }
     if (password.length < 6) {
@@ -95,24 +92,26 @@ export default function RegisterScreen() {
           />
 
           <Text style={styles.label}>パスワード</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="••••••••（6文字以上）"
-            placeholderTextColor={colors.muted}
-            secureTextEntry
-          />
-
-          <Text style={styles.label}>パスワード（確認）</Text>
-          <TextInput
-            style={styles.input}
-            value={passwordConfirm}
-            onChangeText={setPasswordConfirm}
-            placeholder="••••••••"
-            placeholderTextColor={colors.muted}
-            secureTextEntry
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••（６文字以上）"
+              placeholderTextColor={colors.muted}
+              secureTextEntry={!showPassword}
+            />
+            <Pressable
+              style={styles.passwordToggle}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={20}
+                color={colors.textLightA45}
+              />
+            </Pressable>
+          </View>
 
           <Pressable
             style={[styles.btn, styles.btnPrimary]}
@@ -182,6 +181,24 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     color: colors.textLight,
     fontSize: 15,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.primaryA15,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 14,
+    color: colors.textLight,
+    fontSize: 15,
+  },
+  passwordToggle: {
+    padding: spacing.sm,
   },
   btn: {
     borderRadius: radius.md,
