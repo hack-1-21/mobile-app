@@ -20,20 +20,20 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
 
-  const [userId, setUserId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!userId.trim() || !password) {
-      setError("ユーザーIDとパスワードを入力してください");
+    if (!email.trim() || !password) {
+      setError("メールアドレスとパスワードを入力してください");
       return;
     }
     setError("");
     setLoading(true);
     try {
-      await login(userId.trim(), password);
+      await login(email.trim(), password);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "ログインに失敗しました");
     } finally {
@@ -73,15 +73,17 @@ export default function LoginScreen() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={styles.form}>
-          <Text style={styles.label}>ユーザーID</Text>
+          <Text style={styles.label}>メールアドレス</Text>
           <TextInput
             style={styles.input}
-            value={userId}
-            onChangeText={setUserId}
-            placeholder="user_id"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="example@mail.com"
             placeholderTextColor={colors.muted}
             autoCapitalize="none"
             autoCorrect={false}
+            keyboardType="email-address"
+            textContentType="emailAddress"
           />
 
           <Text style={styles.label}>パスワード</Text>

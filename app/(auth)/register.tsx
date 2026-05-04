@@ -20,7 +20,7 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const { register } = useAuth();
 
-  const [userId, setUserId] = useState("");
+  const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -28,7 +28,7 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!userId.trim() || !nickname.trim() || !password) {
+    if (!email.trim() || !nickname.trim() || !password) {
       setError("すべての項目を入力してください");
       return;
     }
@@ -43,7 +43,7 @@ export default function RegisterScreen() {
     setError("");
     setLoading(true);
     try {
-      await register(userId.trim(), nickname.trim(), password);
+      await register(email.trim(), nickname.trim(), password);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "登録に失敗しました");
     } finally {
@@ -71,15 +71,17 @@ export default function RegisterScreen() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={styles.form}>
-          <Text style={styles.label}>ユーザーID</Text>
+          <Text style={styles.label}>メールアドレス</Text>
           <TextInput
             style={styles.input}
-            value={userId}
-            onChangeText={setUserId}
-            placeholder="user_id"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="example@mail.com"
             placeholderTextColor={colors.muted}
             autoCapitalize="none"
             autoCorrect={false}
+            keyboardType="email-address"
+            textContentType="emailAddress"
           />
 
           <Text style={styles.label}>ニックネーム</Text>

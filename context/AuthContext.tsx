@@ -9,6 +9,7 @@ const GUEST_KEY = "auth_is_guest";
 
 export type User = {
   user_id: string;
+  email: string;
   nickname: string;
   level: number;
   exp: number;
@@ -47,12 +48,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    // GoogleSignin.configure({
-    //   // Google Cloud Console の Web クライアント ID を設定してください
-    //   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "",
-    //   iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? "",
-    // });
-
     (async () => {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
       const isGuest = (await SecureStore.getItemAsync(GUEST_KEY)) === "true";
@@ -73,10 +68,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (userId: string, password: string) => {
+    async (email: string, password: string) => {
       const res = await apiFetch<AuthResponse>("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ user_id: userId, password }),
+        body: JSON.stringify({ email, password }),
       });
       await saveSession(res.token, res.user, false);
     },
@@ -84,31 +79,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const register = useCallback(
-    async (userId: string, nickname: string, password: string) => {
+    async (email: string, nickname: string, password: string) => {
       const res = await apiFetch<AuthResponse>("/auth/register", {
         method: "POST",
-        body: JSON.stringify({ user_id: userId, nickname, password }),
+        body: JSON.stringify({ email, nickname, password }),
       });
       await saveSession(res.token, res.user, false);
     },
     [saveSession],
   );
 
-  // const googleLogin = useCallback(async () => {
-  //   await GoogleSignin.hasPlayServices();
-  //   const signInResult = await GoogleSignin.signIn();
-  //   const idToken = signInResult.data?.idToken;
-  //   if (!idToken) throw new Error("Google サインインに失敗しました");
-  //   const res = await apiFetch<AuthResponse>("/auth/google", {
-  //     method: "POST",
-  //     body: JSON.stringify({ id_token: idToken }),
-  //   });
-  //   await saveSession(res.token, res.user, false);
-  // }, [saveSession]);
-
   const loginAsGuest = useCallback(async () => {
     const guestUser: User = {
       user_id: "",
+      email: "",
       nickname: "ゲスト",
       level: 1,
       exp: 0,
@@ -125,9 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     await SecureStore.deleteItemAsync(USER_KEY);
     await SecureStore.deleteItemAsync(GUEST_KEY);
-    // try {
-    //   await GoogleSignin.signOut();
-    // } catch {}
     setState({ token: null, user: null, isGuest: false, isLoading: false });
   }, []);
 
