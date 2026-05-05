@@ -4,16 +4,13 @@ import { StarIcon } from "@/components/icons/StarIcon";
 import { colorTokens, fontFamily, fontSize } from "@/constants/tokens";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Props = {
-  floating?: boolean;
-};
-
 const POINTS_MAX = 100;
+const LEVEL_OUTLINE_SIZE = 4;
 
-export default function PlayerHUD({ floating = true }: Props) {
+export default function PlayerHUD() {
   const { nickname, level, xp, xpMax, points } = usePlayerProfile();
   const progress = xpMax > 0 ? Math.min(xp / xpMax, 1) : 0;
   const levelText = String(level);
@@ -22,13 +19,20 @@ export default function PlayerHUD({ floating = true }: Props) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View pointerEvents="none" style={floating ? styles.container : styles.containerInline}>
+    <View pointerEvents="none" style={styles.containerInline}>
       <View style={[styles.panel, { paddingTop: insets.top }]}>
         <View style={styles.inner}>
-          <View style={styles.avatarRing}></View>
+          <View style={styles.avatarRing}>
+            <Image
+              source={{ uri: `https://api.dicebear.com/9.x/thumbs/png?seed=${nickname.toLowerCase().replace(/ /g, "")}` }}
+              style={styles.avatar}
+            />
+          </View>
 
           <View style={styles.content}>
             <View style={styles.levelRow}>
+              <View style={styles.levelOutlineProgress} />
+              <View style={styles.levelOutlineBubble} />
               <View style={styles.progressShell}>
                 <View style={styles.progressTrack}>
                   <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
@@ -68,13 +72,6 @@ export default function PlayerHUD({ floating = true }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-  },
   containerInline: {
     paddingTop: 0,
   },
@@ -91,11 +88,9 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   avatarRing: {
-    width: 80,
-    height: 80,
     marginTop: 4,
     borderRadius: 55,
-    borderWidth: 6,
+    borderWidth: 4,
     borderColor: colorTokens.hudStroke,
     alignItems: "center",
     justifyContent: "center",
@@ -108,26 +103,50 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     minWidth: 0,
-    gap: 12,
+    gap: 0,
   },
   levelRow: {
+    position: "relative",
     flexDirection: "row",
     alignItems: "center",
+    height: 52,
     marginTop: 20,
+    shadowColor: colorTokens.blueShadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+  },
+  levelOutlineProgress: {
+    position: "absolute",
+    left: -LEVEL_OUTLINE_SIZE,
+    right: 22,
+    height: 30,
+    borderRadius: 50,
+    backgroundColor: colorTokens.primaryForeground,
+  },
+  levelOutlineBubble: {
+    position: "absolute",
+    right: -LEVEL_OUTLINE_SIZE,
+    width: 42 + LEVEL_OUTLINE_SIZE * 2,
+    height: 42 + LEVEL_OUTLINE_SIZE * 2,
+    borderRadius: 50,
+    backgroundColor: colorTokens.primaryForeground,
   },
   progressShell: {
     flex: 1,
     borderRadius: 50,
-    backgroundColor: colorTokens.primaryForeground,
+    backgroundColor: colorTokens.tertiary,
     justifyContent: "center",
+    padding: 6,
   },
   progressTrack: {
-    height: 18,
+    height: 8,
     borderRadius: 9,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: colorTokens.primaryForeground,
     backgroundColor: colorTokens.hudProgressTrack,
     overflow: "hidden",
+    marginRight: 40,
   },
   progressFill: {
     height: "100%",
@@ -136,8 +155,8 @@ const styles = StyleSheet.create({
   levelBubble: {
     position: "absolute",
     right: 0,
-    width: 52,
-    height: 52,
+    width: 42,
+    height: 42,
     borderRadius: 50,
     backgroundColor: colorTokens.tertiary,
     alignItems: "center",
@@ -152,12 +171,13 @@ const styles = StyleSheet.create({
     ...fontFamily.kiwiMaruMedium,
     color: colorTokens.primaryForeground,
     fontSize: 8,
-    marginBottom: 4,
+    marginBottom: 7,
   },
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    marginBottom: 8,
   },
   nickname: {
     ...fontFamily.kiwiMaruRegular,

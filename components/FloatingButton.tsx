@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     right: 20,
-    bottom: 40,
+    bottom: 24,
     zIndex: 1000,
   },
   button: {

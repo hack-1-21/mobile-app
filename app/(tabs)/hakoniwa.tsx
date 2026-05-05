@@ -6,7 +6,7 @@ export default function Hakoniwa() {
   const imageSource = require("@/assets/hakoniwa/image.png");
   return (
     <View style={styles.container}>
-      <PlayerHUD floating={false} />
+      <PlayerHUD />
 
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <Image source={imageSource} style={styles.image} />

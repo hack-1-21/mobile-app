@@ -34,7 +34,7 @@ export default function Settings() {
 
   return (
     <View style={styles.container}>
-      <PlayerHUD floating={false} />
+      <PlayerHUD />
 
       <Modal
         visible={pairingModalVisible}

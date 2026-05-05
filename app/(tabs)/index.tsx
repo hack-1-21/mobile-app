@@ -1,12 +1,13 @@
 import FloatingButton from "@/components/FloatingButton";
+import { MenuIcon } from "@/components/icons/MenuIcon";
 import MapOptionsDrawer, { MapOptions } from "@/components/MapOptionsDrawer";
 import PlayerHUD from "@/components/PlayerHUD";
 import { darkMapStyle, lightMapStyle } from "@/constants/mapStyle";
-import { colors } from "@/constants/tokens";
+import { colors, colorTokens } from "@/constants/tokens";
 import { useTiledSoundData } from "@/hooks/useTiledSoundData";
 import * as Location from "expo-location";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import MapView, { Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { ClipPath, Defs, G, Path, Svg } from "react-native-svg";
 import { buildHexGrid, HexCell, hexVertices, latLngToHexKey } from "../../utils/hexGrid";
@@ -258,14 +259,16 @@ export default function App() {
 
       <PlayerHUD />
 
-      {/* マップオプションボタン (右上) */}
-      <TouchableOpacity
-        style={styles.optionsButton}
-        onPress={() => setOptionsVisible(true)}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.optionsIcon}>⚙</Text>
-      </TouchableOpacity>
+      <View style={styles.optionsButtonContainer}>
+        {/* マップオプションボタン (右上) */}
+        <TouchableOpacity
+          style={styles.optionsButton}
+          onPress={() => setOptionsVisible(true)}
+          activeOpacity={0.85}
+        >
+          <MenuIcon size={30} color={colorTokens.primaryForeground} />
+        </TouchableOpacity>
+      </View>
 
       <FloatingButton onPress={() => setIsDark((v) => !v)} />
 
@@ -280,27 +283,22 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  optionsButtonContainer: {
+    flex: 1,
+    alignItems: "flex-end",
+    padding: 20,
+  },
   optionsButton: {
-    position: "absolute",
-    top: 116,
-    right: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: colors.bgCard,
+    borderRadius: 50,
+    width: 64,
+    height: 64,
+    backgroundColor: colorTokens.tertiary,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.primaryA15,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
-    zIndex: 100,
-  },
-  optionsIcon: {
-    fontSize: 18,
-    color: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });

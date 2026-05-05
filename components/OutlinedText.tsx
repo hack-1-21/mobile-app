@@ -33,7 +33,7 @@ export function OutlinedText({
 }: Props) {
   const value = String(text);
   const measuredWidth = width ?? Math.ceil(value.length * size * 0.62 + outerStrokeWidth);
-  const measuredHeight = height ?? Math.ceil(size + outerStrokeWidth + 2);
+  const measuredHeight = height ?? Math.ceil(size + outerStrokeWidth + outerStrokeWidth);
   const textX = outerStrokeWidth / 2;
   const textY = baselineY ?? Math.ceil(size + outerStrokeWidth / 2 - 1);
 
