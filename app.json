@@ -45,6 +45,15 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/kiwi-maru/400Regular/KiwiMaru_400Regular.ttf",
+            "node_modules/@expo-google-fonts/kiwi-maru/500Medium/KiwiMaru_500Medium.ttf"
+          ]
+        }
       ]
     ],
     "experiments": {
