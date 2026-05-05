@@ -67,9 +67,37 @@ export const spacing = {
 
 // ─── Border radius ───────────────────────────────────────────────────────────
 export const radius = {
-  xs: 5,
+  xs: 4,
   sm: 8,
   md: 12,
   lg: 14,
   full: 9999,
 } as const;
+
+// ここからちゃんとデザインに沿って整理し直す
+
+export const colorTokens = {
+  primary: "#1A40A8",
+  primaryForeground: "#3769F0",
+  secondary: "#3769F0",
+  tertiary: "#EDF2FF",
+  foreground: "#3D3D3D",
+  background: "#FFFFFF",
+  accent: "#F0379D",
+  blueShadow: "#466ACC",
+} as const;
+
+export const fontSize = {
+  maximum: 24,
+  large: 16,
+  minimum: 10,
+} as const;
+
+export const shadowStyles = {
+  tabIcon: {
+    shadowColor: colorTokens.blueShadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+  }
+}

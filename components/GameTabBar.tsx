@@ -1,8 +1,12 @@
+import { colors, colorTokens, fontSize, shadowStyles } from "@/constants/tokens";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { colors } from "@/constants/tokens";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BookIcon } from "./icons/BookIcon";
+import { PinIcon } from "./icons/PinIcon";
+import { TreeIcon } from "./icons/TreeIcon";
+import { WrenchIcon } from "./icons/WrenchIcon";
 
 const TAB_LABELS: Record<string, string> = {
   index: "MAP",
@@ -13,14 +17,34 @@ const TAB_LABELS: Record<string, string> = {
 
 type TabItemProps = {
   label: string;
+  tab: string;
   isActive: boolean;
   onPress: () => void;
 };
 
-function TabItem({ label, isActive, onPress }: TabItemProps) {
+function TabIcon({ type }: { type: string }) {
+  const size = 48;
+  const color = colorTokens.tertiary;
+
+  switch (type) {
+    case "index":
+      return <PinIcon size={size} color={color} />;
+    case "hakoniwa":
+      return <TreeIcon size={size} color={color} />;
+    case "collection":
+      return <BookIcon size={size} color={color} />;
+    case "settings":
+      return <WrenchIcon size={size} color={color} />;
+  }
+}
+
+function TabItem({ label, tab, isActive, onPress }: TabItemProps) {
   return (
     <Pressable onPress={onPress} style={styles.tabPressable}>
       <View style={styles.tabItem}>
+        <View style={styles.tabIcon}>
+          <TabIcon type={tab} />
+        </View>
         <Text style={[styles.tabLabel, isActive ? styles.tabLabelActive : styles.tabLabelInactive]}>
           {label}
         </Text>
@@ -31,18 +55,10 @@ function TabItem({ label, isActive, onPress }: TabItemProps) {
 
 export function GameTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const tabWidth = 100 / state.routes.length;
 
   return (
     <View style={[styles.wrapper, { paddingBottom: insets.bottom }]}>
-      <View style={styles.scanLine} />
-
       <View style={styles.container}>
-        {/* アクティブインジケーター */}
-        <View
-          style={[styles.indicator, { width: `${tabWidth}%`, left: `${tabWidth * state.index}%` }]}
-        />
-
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label = TAB_LABELS[route.name] ?? options.title ?? route.name;
@@ -52,6 +68,7 @@ export function GameTabBar({ state, descriptors, navigation }: BottomTabBarProps
             <TabItem
               key={route.key}
               label={label}
+              tab={route.name}
               isActive={isActive}
               onPress={() => {
                 const event = navigation.emit({
@@ -73,28 +90,16 @@ export function GameTabBar({ state, descriptors, navigation }: BottomTabBarProps
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: colors.bgTabBar,
-    borderTopWidth: 0,
-  },
-  scanLine: {
-    height: 1,
-    backgroundColor: colors.primaryA18,
+    backgroundColor: colorTokens.primary,
+    color: colorTokens.primaryForeground,
+    borderTopWidth: 4,
+    borderTopColor: colorTokens.secondary,
   },
   container: {
     flexDirection: "row",
-    height: 56,
     position: "relative",
-  },
-  indicator: {
-    position: "absolute",
-    top: 0,
-    height: 2,
-    backgroundColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 8,
-    elevation: 4,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   tabPressable: {
     flex: 1,
@@ -104,9 +109,12 @@ const styles = StyleSheet.create({
   tabItem: {
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 6,
     position: "relative",
+    height: 72,
+    aspectRatio: 1,
+  },
+  tabIcon: {
+    ...shadowStyles.tabIcon,
   },
   glowBg: {
     ...StyleSheet.absoluteFillObject,
@@ -114,14 +122,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   tabLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1.5,
+    fontSize: fontSize.large,
+    fontWeight: "500",
   },
   tabLabelActive: {
-    color: colors.primary,
+    color: colorTokens.tertiary,
   },
   tabLabelInactive: {
-    color: colors.primaryA35,
+    color: colorTokens.tertiary,
   },
 });
