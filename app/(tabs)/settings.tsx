@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const DEVICE_CONNECTED = false; // スマートウォッチ連携の状態（仮）
 
@@ -34,7 +33,7 @@ export default function Settings() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <PlayerHUD floating={false} />
 
       <Modal
@@ -45,7 +44,7 @@ export default function Settings() {
       >
         <Pressable style={styles.modalOverlay} onPress={handlePairingCancel}>
           <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Pressable style={styles.modalCard} onPress={() => { }}>
               <Text style={styles.modalTitle}>スマートウォッチを連携</Text>
               <Text style={styles.modalSubtitle}>
                 デバイスに表示されているペアリングコードを入力してください
@@ -109,7 +108,7 @@ export default function Settings() {
           )}
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

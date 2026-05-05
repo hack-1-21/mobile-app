@@ -1,7 +1,7 @@
 import { colors, colorTokens, fontSize, shadowStyles } from "@/constants/tokens";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BookIcon } from "./icons/BookIcon";
 import { PinIcon } from "./icons/PinIcon";
@@ -124,6 +124,10 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: fontSize.large,
     fontWeight: "500",
+    fontFamily: Platform.select({
+      android: 'KiwiMaru_400Regular',
+      ios: 'KiwiMaru-Regular',
+    }),
   },
   tabLabelActive: {
     color: colorTokens.tertiary,

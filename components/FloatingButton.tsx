@@ -1,25 +1,22 @@
-import { colors } from "@/constants/tokens";
+import { colors, colorTokens } from "@/constants/tokens";
 import React from "react";
-import { GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { GestureResponderEvent, StyleSheet, TouchableOpacity, View } from "react-native";
+import { RefreshIcon } from "./icons/RefreshIcon";
 
 type Props = {
   onPress?: (e: GestureResponderEvent) => void;
-  label?: string;
-  isDark?: boolean;
 };
 
-export default function FloatingButton({ onPress, label, isDark = true }: Props) {
-  const icon = label ?? (isDark ? "☀️" : "🌙");
-
+export default function FloatingButton({ onPress }: Props) {
   return (
     <View pointerEvents="box-none" style={styles.container}>
       <TouchableOpacity
         accessibilityRole="button"
         onPress={onPress}
-        style={[styles.button, isDark ? styles.buttonDark : styles.buttonLight]}
+        style={[styles.button]}
         activeOpacity={0.85}
       >
-        <Text style={styles.icon}>{icon}</Text>
+        <RefreshIcon size={40} color={colorTokens.tertiary} />
       </TouchableOpacity>
     </View>
   );
@@ -33,9 +30,9 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   button: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 64,
+    height: 64,
+    borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: colors.shadow,
@@ -43,17 +40,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 8,
-    borderWidth: 1,
-  },
-  buttonDark: {
-    backgroundColor: colors.bgCardStrong,
-    borderColor: colors.primaryA20,
-  },
-  buttonLight: {
-    backgroundColor: "rgba(237,232,223,0.92)",
-    borderColor: "rgba(92,74,58,0.25)",
-  },
-  icon: {
-    fontSize: 22,
+    backgroundColor: colorTokens.primaryForeground,
   },
 });

@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 // ─── Primitive helpers ───────────────────────────────────────────────────────
 const _blue = (a: number) => `rgba(100,200,255,${a})`;
 const _dark = (a: number) => `rgba(10,12,20,${a})`;
@@ -85,6 +87,12 @@ export const colorTokens = {
   background: "#FFFFFF",
   accent: "#F0379D",
   blueShadow: "#466ACC",
+  hudPanel: "#2246AB",
+  hudStroke: "#EDF2FF",
+  hudProgressFill: "#FFF36A",
+  hudProgressTrack: "#C9C9C9",
+  hudAvatarFill: "#B3B3B3",
+  hudText: "#FFFFFF",
 } as const;
 
 export const fontSize = {
@@ -93,11 +101,26 @@ export const fontSize = {
   minimum: 10,
 } as const;
 
+export const fontFamily = {
+  kiwiMaruRegular: {
+    fontFamily: Platform.select({
+      android: "KiwiMaru_400Regular",
+      ios: "KiwiMaru-Regular",
+    }),
+  },
+  kiwiMaruMedium: {
+    fontFamily: Platform.select({
+      android: "KiwiMaru_500Medium",
+      ios: "KiwiMaru-Medium",
+    }),
+  },
+} as const;
+
 export const shadowStyles = {
   tabIcon: {
     shadowColor: colorTokens.blueShadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 4,
-  }
-}
+  },
+};

@@ -267,7 +267,7 @@ export default function App() {
         <Text style={styles.optionsIcon}>⚙</Text>
       </TouchableOpacity>
 
-      <FloatingButton isDark={isDark} onPress={() => setIsDark((v) => !v)} />
+      <FloatingButton onPress={() => setIsDark((v) => !v)} />
 
       <MapOptionsDrawer
         visible={optionsVisible}
