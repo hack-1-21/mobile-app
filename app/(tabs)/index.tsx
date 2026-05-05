@@ -1,5 +1,6 @@
 import FloatingButton from "@/components/FloatingButton";
 import { MenuIcon } from "@/components/icons/MenuIcon";
+import { PinIcon } from "@/components/icons/PinIcon";
 import MapOptionsDrawer, { MapOptions } from "@/components/MapOptionsDrawer";
 import PlayerHUD from "@/components/PlayerHUD";
 import { darkMapStyle, lightMapStyle } from "@/constants/mapStyle";
@@ -7,9 +8,9 @@ import { colors, colorTokens } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { useTiledSoundData } from "@/hooks/useTiledSoundData";
 import * as Location from "expo-location";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import MapView, { Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import MapView, { Marker, Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { ClipPath, Defs, G, Path, Svg } from "react-native-svg";
 import { buildHexGrid, hexVertices, latLngToHexKey } from "../../utils/hexGrid";
 import { getCellSize, getZoomLevel, weightToColor } from "../../utils/mapUtils";
@@ -55,6 +56,9 @@ export default function App() {
   const [mapOptions, setMapOptions] = useState<MapOptions>({
     showHexGrid: true,
   });
+  const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(
+    null,
+  );
   const showsExplorationMap = isDark;
   const showsGradientGrid = !isDark;
   const publicSoundData = useTiledSoundData(region, showsGradientGrid ? undefined : null);
@@ -75,10 +79,48 @@ export default function App() {
   const currentSizeRef = useRef(INITIAL_CELL_SIZE);
   const mapRef = useRef<MapView>(null);
 
+  useEffect(() => {
+    let sub: Location.LocationSubscription | undefined;
+    let alive = true;
+
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (!alive || status !== "granted") return;
+      const next = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Balanced,
+          distanceInterval: 5,
+        },
+        (loc) => {
+          if (alive) {
+            setUserCoords({
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+            });
+          }
+        },
+      );
+      if (!alive) {
+        next.remove();
+        return;
+      }
+      sub = next;
+    })();
+
+    return () => {
+      alive = false;
+      void sub?.remove();
+    };
+  }, []);
+
   const handleMapReady = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") return;
     const loc = await Location.getCurrentPositionAsync({});
+    setUserCoords({
+      latitude: loc.coords.latitude,
+      longitude: loc.coords.longitude,
+    });
     mapRef.current?.animateToRegion(
       {
         latitude: loc.coords.latitude,
@@ -210,9 +252,13 @@ export default function App() {
         onRegionChangeComplete={handleRegionChange}
         onMapReady={handleMapReady}
         initialRegion={INITIAL_REGION}
-        showsUserLocation
         customMapStyle={mapStyle}
       >
+        {userCoords && (
+          <Marker coordinate={userCoords} anchor={{ x: 0.5, y: 1 }} tracksViewChanges={false}>
+            <PinIcon size={40} color={colorTokens.accent} />
+          </Marker>
+        )}
         {fogOverlay && (
           <Polygon
             coordinates={fogOverlay.outer}
@@ -237,7 +283,7 @@ export default function App() {
           <Polyline
             key={edge.key}
             coordinates={edge.coords}
-            strokeColor={colors.boundaryStroke}
+            strokeColor={colorTokens.primary}
             strokeWidth={2}
           />
         ))}
