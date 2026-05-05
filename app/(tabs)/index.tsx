@@ -4,13 +4,14 @@ import MapOptionsDrawer, { MapOptions } from "@/components/MapOptionsDrawer";
 import PlayerHUD from "@/components/PlayerHUD";
 import { darkMapStyle, lightMapStyle } from "@/constants/mapStyle";
 import { colors, colorTokens } from "@/constants/tokens";
+import { useAuth } from "@/context/AuthContext";
 import { useTiledSoundData } from "@/hooks/useTiledSoundData";
 import * as Location from "expo-location";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import MapView, { Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { ClipPath, Defs, G, Path, Svg } from "react-native-svg";
-import { buildHexGrid, HexCell, hexVertices, latLngToHexKey } from "../../utils/hexGrid";
+import { buildHexGrid, hexVertices, latLngToHexKey } from "../../utils/hexGrid";
 import { getCellSize, getZoomLevel, weightToColor } from "../../utils/mapUtils";
 
 const INITIAL_REGION: Region = {
@@ -45,23 +46,31 @@ const EDGE_NEIGHBORS: [number, number][] = [
 ];
 
 export default function App() {
-  const [grid, setGrid] = useState<HexCell[]>([]);
+  const { user } = useAuth();
   const [cellSize, setCellSize] = useState(INITIAL_CELL_SIZE);
   const [region, setRegion] = useState<Region>(INITIAL_REGION);
   const [mapDims, setMapDims] = useState({ width: 0, height: 0 });
-  const soundData = useTiledSoundData(region);
-
-  useEffect(() => {
-    setGrid(buildHexGrid(soundData, cellSize));
-  }, [soundData, cellSize]);
-
   const [optionsVisible, setOptionsVisible] = useState(false);
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   const [mapOptions, setMapOptions] = useState<MapOptions>({
     showHexGrid: true,
   });
   const showsExplorationMap = isDark;
   const showsGradientGrid = !isDark;
+  const publicSoundData = useTiledSoundData(region, showsGradientGrid ? undefined : null);
+  const explorationSoundData = useTiledSoundData(
+    region,
+    showsExplorationMap ? user?.user_id || null : null,
+  );
+  const publicGrid = useMemo(
+    () => buildHexGrid(publicSoundData, cellSize),
+    [publicSoundData, cellSize],
+  );
+  const explorationGrid = useMemo(
+    () => buildHexGrid(explorationSoundData, cellSize),
+    [explorationSoundData, cellSize],
+  );
+  const grid = showsExplorationMap ? explorationGrid : publicGrid;
 
   const currentSizeRef = useRef(INITIAL_CELL_SIZE);
   const mapRef = useRef<MapView>(null);

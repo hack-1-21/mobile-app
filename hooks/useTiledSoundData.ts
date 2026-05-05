@@ -42,44 +42,61 @@ function tileKeyToBBox(key: string): {
   };
 }
 
-export function useTiledSoundData(region: Region): SoundPoint[] {
+export function useTiledSoundData(region: Region, userId?: string | null): SoundPoint[] {
   const fetchedTilesRef = useRef<Set<string>>(new Set());
   const soundMapRef = useRef<Map<number, SoundPoint>>(new Map());
+  const activeUserIdRef = useRef<string | null | undefined>(undefined);
   const [soundData, setSoundData] = useState<SoundPoint[]>([]);
 
-  const fetchNewTiles = useCallback(async (currentRegion: Region) => {
-    if (currentRegion.longitudeDelta > MAX_LONGITUDE_DELTA) return;
+  const fetchNewTiles = useCallback(
+    async (currentRegion: Region, currentUserId?: string | null) => {
+      if (activeUserIdRef.current !== currentUserId) {
+        activeUserIdRef.current = currentUserId;
+        fetchedTilesRef.current.clear();
+        soundMapRef.current.clear();
+        setSoundData([]);
+      }
 
-    const tileKeys = getVisibleTileKeys(currentRegion);
-    const newKeys = tileKeys.filter((k) => !fetchedTilesRef.current.has(k));
-    if (newKeys.length === 0) return;
+      if (currentUserId === null) return;
+      if (currentRegion.longitudeDelta > MAX_LONGITUDE_DELTA) return;
 
-    newKeys.forEach((k) => fetchedTilesRef.current.add(k));
+      const tileKeys = getVisibleTileKeys(currentRegion);
+      const newKeys = tileKeys.filter((k) => !fetchedTilesRef.current.has(k));
+      if (newKeys.length === 0) return;
 
-    await Promise.all(
-      newKeys.map(async (key) => {
-        const bbox = tileKeyToBBox(key);
-        const params = new URLSearchParams({
-          ne_lat: String(bbox.neLat),
-          ne_lng: String(bbox.neLng),
-          sw_lat: String(bbox.swLat),
-          sw_lng: String(bbox.swLng),
-        });
-        try {
-          const points = await apiFetch<SoundPoint[]>(`/measurements/bbox?${params}`);
-          points.forEach((p) => soundMapRef.current.set(p.id, p));
-        } catch {
-          fetchedTilesRef.current.delete(key);
-        }
-      }),
-    );
+      newKeys.forEach((k) => fetchedTilesRef.current.add(k));
 
-    setSoundData(Array.from(soundMapRef.current.values()));
-  }, []);
+      await Promise.all(
+        newKeys.map(async (key) => {
+          const bbox = tileKeyToBBox(key);
+          const params = new URLSearchParams({
+            ne_lat: String(bbox.neLat),
+            ne_lng: String(bbox.neLng),
+            sw_lat: String(bbox.swLat),
+            sw_lng: String(bbox.swLng),
+          });
+          if (currentUserId) {
+            params.set("user_id", currentUserId);
+          }
+          try {
+            const points = await apiFetch<SoundPoint[]>(`/measurements/bbox?${params}`);
+            if (activeUserIdRef.current !== currentUserId) return;
+            points.forEach((p) => soundMapRef.current.set(p.id, p));
+          } catch {
+            fetchedTilesRef.current.delete(key);
+          }
+        }),
+      );
+
+      if (activeUserIdRef.current !== currentUserId) return;
+      setSoundData(Array.from(soundMapRef.current.values()));
+    },
+    [],
+  );
 
   useEffect(() => {
-    fetchNewTiles(region);
-  }, [region, fetchNewTiles]);
+    fetchNewTiles(region, userId);
+  }, [region, userId, fetchNewTiles]);
 
   return soundData;
 }
