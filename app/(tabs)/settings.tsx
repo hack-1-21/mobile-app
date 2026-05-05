@@ -1,12 +1,16 @@
+import { ApiError, apiFetch } from "@/constants/api";
 import PlayerHUD from "@/components/PlayerHUD";
 import { colors, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -14,22 +18,134 @@ import {
   View,
 } from "react-native";
 
-const DEVICE_CONNECTED = false; // スマートウォッチ連携の状態（仮）
+type LinkedDevice = {
+  device_id: string;
+  linked_at: string;
+  last_used_at: string | null;
+};
+
+type DeviceStatusResponse = {
+  status: "linked" | "unlinked";
+};
+
+function formatDeviceDate(value: string | null): string {
+  if (!value) return "未使用";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "不明";
+
+  return date.toLocaleString("ja-JP", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function Settings() {
-  const { logout, isGuest } = useAuth();
+  const { logout, isGuest, token } = useAuth();
   const [pairingModalVisible, setPairingModalVisible] = useState(false);
   const [pairingCode, setPairingCode] = useState("");
+  const [linkedDevices, setLinkedDevices] = useState<LinkedDevice[]>([]);
+  const [isLoadingDevices, setIsLoadingDevices] = useState(false);
+  const [isSubmittingPairing, setIsSubmittingPairing] = useState(false);
+  const [unlinkingDeviceId, setUnlinkingDeviceId] = useState<string | null>(null);
+  const [deviceError, setDeviceError] = useState<string | null>(null);
 
-  function handlePairingSubmit() {
-    // TODO: ペアリングコードを使った実際の連携処理
+  const authHeaders = useMemo(
+    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
+    [token],
+  );
+
+  const fetchLinkedDevices = useCallback(async () => {
+    if (isGuest || !authHeaders) {
+      setLinkedDevices([]);
+      setDeviceError(null);
+      return;
+    }
+
+    setIsLoadingDevices(true);
+    setDeviceError(null);
+    try {
+      const devices = await apiFetch<LinkedDevice[]>("/device/links", {
+        headers: authHeaders,
+      });
+      setLinkedDevices(devices);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "時計の取得に失敗しました";
+      setDeviceError(message);
+    } finally {
+      setIsLoadingDevices(false);
+    }
+  }, [authHeaders, isGuest]);
+
+  useEffect(() => {
+    void fetchLinkedDevices();
+  }, [fetchLinkedDevices]);
+
+  const normalizedPairingCode = pairingCode.trim().toUpperCase();
+
+  async function handlePairingSubmit() {
+    if (!authHeaders || !normalizedPairingCode || isSubmittingPairing) return;
+
+    setIsSubmittingPairing(true);
+    try {
+      await apiFetch<DeviceStatusResponse>("/device/complete-link", {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({ code: normalizedPairingCode }),
+      });
+      setPairingModalVisible(false);
+      setPairingCode("");
+      await fetchLinkedDevices();
+      Alert.alert("連携しました", "スマートウォッチをこのアカウントに紐づけました。");
+    } catch (error) {
+      const message =
+        error instanceof ApiError || error instanceof Error ? error.message : "連携に失敗しました";
+      Alert.alert("連携できませんでした", message);
+    } finally {
+      setIsSubmittingPairing(false);
+    }
+  }
+
+  function handlePairingCancel() {
+    if (isSubmittingPairing) return;
     setPairingModalVisible(false);
     setPairingCode("");
   }
 
-  function handlePairingCancel() {
-    setPairingModalVisible(false);
-    setPairingCode("");
+  function confirmUnlink(deviceId: string) {
+    Alert.alert("連携を解除しますか？", "解除後、この時計のデバイストークンは無効になります。", [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "解除",
+        style: "destructive",
+        onPress: () => {
+          void handleUnlinkDevice(deviceId);
+        },
+      },
+    ]);
+  }
+
+  async function handleUnlinkDevice(deviceId: string) {
+    if (!authHeaders || unlinkingDeviceId) return;
+
+    setUnlinkingDeviceId(deviceId);
+    try {
+      await apiFetch<DeviceStatusResponse>(`/device/links/${encodeURIComponent(deviceId)}`, {
+        method: "DELETE",
+        headers: authHeaders,
+      });
+      setLinkedDevices((devices) => devices.filter((device) => device.device_id !== deviceId));
+    } catch (error) {
+      const message =
+        error instanceof ApiError || error instanceof Error
+          ? error.message
+          : "連携解除に失敗しました";
+      Alert.alert("解除できませんでした", message);
+    } finally {
+      setUnlinkingDeviceId(null);
+    }
   }
 
   return (
@@ -44,7 +160,7 @@ export default function Settings() {
       >
         <Pressable style={styles.modalOverlay} onPress={handlePairingCancel}>
           <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <Pressable style={styles.modalCard} onPress={() => { }}>
+            <Pressable style={styles.modalCard} onPress={() => {}}>
               <Text style={styles.modalTitle}>スマートウォッチを連携</Text>
               <Text style={styles.modalSubtitle}>
                 デバイスに表示されているペアリングコードを入力してください
@@ -52,23 +168,36 @@ export default function Settings() {
               <TextInput
                 style={styles.pairingInput}
                 value={pairingCode}
-                onChangeText={setPairingCode}
-                placeholder="例: AB12-CD34"
+                onChangeText={(value) => setPairingCode(value.toUpperCase())}
+                placeholder="例: NFHH-9927"
                 placeholderTextColor={colors.muted}
                 autoCapitalize="characters"
                 autoCorrect={false}
                 maxLength={9}
+                editable={!isSubmittingPairing}
               />
               <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.modalCancelBtn} onPress={handlePairingCancel}>
+                <TouchableOpacity
+                  style={styles.modalCancelBtn}
+                  onPress={handlePairingCancel}
+                  disabled={isSubmittingPairing}
+                >
                   <Text style={styles.modalCancelText}>キャンセル</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.modalSubmitBtn, !pairingCode && styles.modalSubmitBtnDisabled]}
+                  style={[
+                    styles.modalSubmitBtn,
+                    (!normalizedPairingCode || isSubmittingPairing) &&
+                      styles.modalSubmitBtnDisabled,
+                  ]}
                   onPress={handlePairingSubmit}
-                  disabled={!pairingCode}
+                  disabled={!normalizedPairingCode || isSubmittingPairing}
                 >
-                  <Text style={styles.modalSubmitText}>連携する</Text>
+                  {isSubmittingPairing ? (
+                    <ActivityIndicator color={colors.bgPage} />
+                  ) : (
+                    <Text style={styles.modalSubmitText}>連携する</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </Pressable>
@@ -76,26 +205,68 @@ export default function Settings() {
         </Pressable>
       </Modal>
 
-      <View style={styles.wrapper}>
+      <ScrollView contentContainerStyle={styles.wrapper}>
         <Text style={styles.heading}>設定</Text>
 
         {!isGuest && (
-          <View style={styles.deviceConnectContainer}>
-            <Text style={styles.labelText}>スマートウォッチ連携</Text>
-            {DEVICE_CONNECTED ? (
-              <TouchableOpacity
-                style={[styles.deviceConnectBtn, styles.disconnectedBtn]}
-                onPress={() => alert("連携機能は開発中です")}
-              >
-                <Text style={styles.deviceDisconnectText}>連携解除</Text>
-              </TouchableOpacity>
-            ) : (
+          <View style={styles.deviceSection}>
+            <View style={styles.deviceConnectContainer}>
+              <Text style={styles.labelText}>スマートウォッチ連携</Text>
               <TouchableOpacity
                 style={[styles.deviceConnectBtn, styles.connectedBtn]}
                 onPress={() => setPairingModalVisible(true)}
               >
                 <Text style={styles.deviceConnectText}>連携する</Text>
               </TouchableOpacity>
+            </View>
+
+            {isLoadingDevices ? (
+              <View style={styles.deviceStateRow}>
+                <ActivityIndicator color={colors.primary} />
+                <Text style={styles.deviceStateText}>連携中の時計を取得しています</Text>
+              </View>
+            ) : deviceError ? (
+              <View style={styles.deviceStateRow}>
+                <Text style={styles.deviceErrorText}>{deviceError}</Text>
+                <TouchableOpacity style={styles.retryBtn} onPress={fetchLinkedDevices}>
+                  <Text style={styles.retryText}>再読み込み</Text>
+                </TouchableOpacity>
+              </View>
+            ) : linkedDevices.length === 0 ? (
+              <Text style={styles.emptyDeviceText}>連携中の時計はありません。</Text>
+            ) : (
+              <View style={styles.deviceList}>
+                {linkedDevices.map((device) => (
+                  <View key={device.device_id} style={styles.deviceItem}>
+                    <View style={styles.deviceInfo}>
+                      <Text style={styles.deviceIdText} numberOfLines={1}>
+                        {device.device_id}
+                      </Text>
+                      <Text style={styles.deviceMetaText}>
+                        連携: {formatDeviceDate(device.linked_at)}
+                      </Text>
+                      <Text style={styles.deviceMetaText}>
+                        最終使用: {formatDeviceDate(device.last_used_at)}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[
+                        styles.deviceConnectBtn,
+                        styles.disconnectedBtn,
+                        unlinkingDeviceId === device.device_id && styles.deviceConnectBtnDisabled,
+                      ]}
+                      onPress={() => confirmUnlink(device.device_id)}
+                      disabled={unlinkingDeviceId !== null}
+                    >
+                      {unlinkingDeviceId === device.device_id ? (
+                        <ActivityIndicator color={colors.primary} />
+                      ) : (
+                        <Text style={styles.deviceDisconnectText}>解除</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
             )}
           </View>
         )}
@@ -107,7 +278,7 @@ export default function Settings() {
             <Text style={styles.logoutText}>ログアウト</Text>
           )}
         </Pressable>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -119,6 +290,7 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   heading: {
     color: colors.primary,
@@ -157,6 +329,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  deviceSection: {
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
   deviceConnectContainer: {
     display: "flex",
     flexDirection: "row",
@@ -169,6 +345,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: radius.sm,
+  },
+  deviceConnectBtnDisabled: {
+    opacity: 0.55,
   },
   connectedBtn: {
     backgroundColor: colors.primary,
@@ -186,6 +365,67 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 14,
     fontWeight: "600",
+  },
+  deviceStateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.primaryA15,
+    borderRadius: radius.sm,
+    padding: spacing.md,
+  },
+  deviceStateText: {
+    color: colors.muted,
+    fontSize: 13,
+  },
+  deviceErrorText: {
+    flex: 1,
+    color: "#FF8A8A",
+    fontSize: 13,
+  },
+  retryBtn: {
+    borderWidth: 1,
+    borderColor: colors.primaryA30,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
+  },
+  retryText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  emptyDeviceText: {
+    color: colors.muted,
+    fontSize: 13,
+    paddingVertical: spacing.sm,
+  },
+  deviceList: {
+    gap: spacing.sm,
+  },
+  deviceItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.primaryA15,
+    borderRadius: radius.sm,
+    padding: spacing.md,
+  },
+  deviceInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  deviceIdText: {
+    color: colors.textLight,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  deviceMetaText: {
+    color: colors.muted,
+    fontSize: 12,
   },
   modalOverlay: {
     flex: 1,
