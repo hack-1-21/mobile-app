@@ -86,10 +86,7 @@ export default function LoginScreen() {
               placeholderTextColor={colors.muted}
               secureTextEntry={!showPassword}
             />
-            <Pressable
-              style={styles.passwordToggle}
-              onPress={() => setShowPassword(!showPassword)}
-            >
+            <Pressable style={styles.passwordToggle} onPress={() => setShowPassword(!showPassword)}>
               <Ionicons
                 name={showPassword ? "eye-off" : "eye"}
                 size={20}

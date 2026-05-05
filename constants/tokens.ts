@@ -81,12 +81,13 @@ export const radius = {
 export const colorTokens = {
   primary: "#1A40A8",
   primaryForeground: "#3769F0",
-  secondary: "#3769F0",
+  secondary: "#7EA0FF",
   tertiary: "#EDF2FF",
   foreground: "#3D3D3D",
   background: "#FFFFFF",
   accent: "#F0379D",
   blueShadow: "#466ACC",
+  blueShadowSecondary: "#B9CBFF",
   hudPanel: "#2246AB",
   hudStroke: "#EDF2FF",
   hudProgressFill: "#FFF36A",
@@ -120,6 +121,12 @@ export const shadowStyles = {
   tabIcon: {
     shadowColor: colorTokens.blueShadow,
     shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+  },
+  tabIconActive: {
+    shadowColor: colorTokens.blueShadowSecondary,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 4,
   },

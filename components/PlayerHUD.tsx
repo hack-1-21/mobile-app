@@ -24,7 +24,9 @@ export default function PlayerHUD() {
         <View style={styles.inner}>
           <View style={styles.avatarRing}>
             <Image
-              source={{ uri: `https://api.dicebear.com/9.x/thumbs/png?seed=${nickname.toLowerCase().replace(/ /g, "")}` }}
+              source={{
+                uri: `https://api.dicebear.com/9.x/thumbs/png?seed=${nickname.toLowerCase().replace(/ /g, "")}`,
+              }}
               style={styles.avatar}
             />
           </View>

@@ -1,4 +1,4 @@
-import { colors, colorTokens, fontSize, shadowStyles } from "@/constants/tokens";
+import { colorTokens, fontSize, shadowStyles } from "@/constants/tokens";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
@@ -22,9 +22,9 @@ type TabItemProps = {
   onPress: () => void;
 };
 
-function TabIcon({ type }: { type: string }) {
-  const size = 48;
-  const color = colorTokens.tertiary;
+function TabIcon({ type, isActive }: { type: string; isActive: boolean }) {
+  const size = 44;
+  const color = isActive ? colorTokens.secondary : colorTokens.tertiary;
 
   switch (type) {
     case "index":
@@ -40,10 +40,13 @@ function TabIcon({ type }: { type: string }) {
 
 function TabItem({ label, tab, isActive, onPress }: TabItemProps) {
   return (
-    <Pressable onPress={onPress} style={styles.tabPressable}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.tabPressable, isActive ? styles.tabItemActive : null]}
+    >
       <View style={styles.tabItem}>
-        <View style={styles.tabIcon}>
-          <TabIcon type={tab} />
+        <View style={[styles.tabIcon, isActive ? styles.tabIconActive : null]}>
+          <TabIcon type={tab} isActive={isActive} />
         </View>
         <Text style={[styles.tabLabel, isActive ? styles.tabLabelActive : styles.tabLabelInactive]}>
           {label}
@@ -93,44 +96,49 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.primary,
     color: colorTokens.primaryForeground,
     borderTopWidth: 4,
-    borderTopColor: colorTokens.secondary,
+    borderTopColor: colorTokens.primaryForeground,
   },
   container: {
     flexDirection: "row",
     position: "relative",
-    paddingTop: 8,
+    paddingTop: 6,
     paddingBottom: 4,
+    justifyContent: "space-evenly",
   },
   tabPressable: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 12,
+    height: 72,
+    aspectRatio: 1,
+    paddingVertical: 4,
+  },
+  tabItemActive: {
+    backgroundColor: colorTokens.tertiary,
+    borderColor: colorTokens.secondary,
+    borderWidth: 3,
   },
   tabItem: {
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    height: 72,
-    aspectRatio: 1,
   },
   tabIcon: {
     ...shadowStyles.tabIcon,
   },
-  glowBg: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.primaryA07,
-    borderRadius: 4,
+  tabIconActive: {
+    ...shadowStyles.tabIconActive,
   },
   tabLabel: {
     fontSize: fontSize.large,
     fontWeight: "500",
     fontFamily: Platform.select({
-      android: 'KiwiMaru_400Regular',
-      ios: 'KiwiMaru-Regular',
+      android: "KiwiMaru_400Regular",
+      ios: "KiwiMaru-Regular",
     }),
   },
   tabLabelActive: {
-    color: colorTokens.tertiary,
+    color: colorTokens.secondary,
   },
   tabLabelInactive: {
     color: colorTokens.tertiary,

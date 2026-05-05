@@ -1,8 +1,8 @@
 import { colors } from "@/constants/tokens";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { KiwiMaru_400Regular, KiwiMaru_500Medium, useFonts } from '@expo-google-fonts/kiwi-maru';
+import { KiwiMaru_400Regular, KiwiMaru_500Medium, useFonts } from "@expo-google-fonts/kiwi-maru";
 import { Stack, useRouter, useSegments } from "expo-router";
-import * as SplashScreen from 'expo-splash-screen';
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
@@ -51,7 +51,7 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     KiwiMaru_400Regular,
     KiwiMaru_500Medium,
-  })
+  });
 
   useEffect(() => {
     if (loaded || error) {

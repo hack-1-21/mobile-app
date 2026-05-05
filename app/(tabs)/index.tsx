@@ -60,6 +60,8 @@ export default function App() {
   const [mapOptions, setMapOptions] = useState<MapOptions>({
     showHexGrid: true,
   });
+  const showsExplorationMap = isDark;
+  const showsGradientGrid = !isDark;
 
   const currentSizeRef = useRef(INITIAL_CELL_SIZE);
   const mapRef = useRef<MapView>(null);
@@ -95,7 +97,7 @@ export default function App() {
 
   // 大きな1枚の霧ポリゴンに探索済みセルを穴として切り抜く
   const fogOverlay = useMemo(() => {
-    if (isDark) return null;
+    if (!showsExplorationMap) return null;
     const padLat = region.latitudeDelta * 5;
     const padLng = region.longitudeDelta * 5;
     return {
@@ -107,11 +109,11 @@ export default function App() {
       ],
       holes: grid.map((cell) => hexVertices(cell.centerLat, cell.centerLng, cellSize)),
     };
-  }, [isDark, region, grid, cellSize]);
+  }, [showsExplorationMap, region, grid, cellSize]);
 
   // 霧と探索済みエリアの境界辺のみ Polyline で描画
   const boundaryEdges = useMemo(() => {
-    if (isDark) return [];
+    if (!showsExplorationMap) return [];
     const edges: {
       key: string;
       coords: [{ latitude: number; longitude: number }, { latitude: number; longitude: number }];
@@ -132,7 +134,7 @@ export default function App() {
       }
     }
     return edges;
-  }, [isDark, grid, exploredKeys, cellSize]);
+  }, [showsExplorationMap, grid, exploredKeys, cellSize]);
 
   // lat/lng → SVG スクリーン座標変換 (region と mapDims に依存)
   const latLngToPixel = useMemo(() => {
@@ -145,7 +147,7 @@ export default function App() {
 
   // 霧エリアを evenodd で表現する SVG パス文字列 (外枠 + 探索済みヘックスを穴として追加)
   const fogSvgPath = useMemo(() => {
-    if (isDark || mapDims.width === 0) return "";
+    if (!showsExplorationMap || mapDims.width === 0) return "";
     const { width, height } = mapDims;
     let d = `M 0 0 L ${width} 0 L ${width} ${height} L 0 ${height} Z `;
     for (const cell of grid) {
@@ -156,11 +158,11 @@ export default function App() {
       d += "Z ";
     }
     return d;
-  }, [isDark, mapDims, grid, cellSize, latLngToPixel]);
+  }, [showsExplorationMap, mapDims, grid, cellSize, latLngToPixel]);
 
   // 霧エリア内にランダムに雲を配置 (スクリーン座標)
   const cloudSvgPositions = useMemo(() => {
-    if (isDark || mapDims.width === 0) return [];
+    if (!showsExplorationMap || mapDims.width === 0) return [];
     const COUNT = 20;
     const seed =
       (Math.round(region.latitude * 50) * 1000000 + Math.round(region.longitude * 50)) >>> 0;
@@ -178,7 +180,7 @@ export default function App() {
       }
     }
     return positions;
-  }, [isDark, mapDims, region, exploredKeys, cellSize, latLngToPixel]);
+  }, [showsExplorationMap, mapDims, region, exploredKeys, cellSize, latLngToPixel]);
 
   const mapStyle = isDark ? darkMapStyle : lightMapStyle;
 
@@ -212,7 +214,7 @@ export default function App() {
           />
         )}
         {mapOptions.showHexGrid &&
-          isDark &&
+          showsGradientGrid &&
           grid.map((cell) => (
             <Polygon
               key={cell.key}
@@ -233,7 +235,7 @@ export default function App() {
       </MapView>
 
       {/* 霧エリア内だけに雲を描画する SVG オーバーレイ */}
-      {!isDark && fogSvgPath !== "" && (
+      {showsExplorationMap && fogSvgPath !== "" && (
         <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
           <Svg width={mapDims.width} height={mapDims.height}>
             <Defs>
@@ -266,7 +268,7 @@ export default function App() {
           onPress={() => setOptionsVisible(true)}
           activeOpacity={0.85}
         >
-          <MenuIcon size={30} color={colorTokens.primaryForeground} />
+          <MenuIcon size={30} color={colorTokens.secondary} />
         </TouchableOpacity>
       </View>
 
