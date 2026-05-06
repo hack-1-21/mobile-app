@@ -1,6 +1,6 @@
 import PlayerHUD from "@/components/PlayerHUD";
 import { ApiError, apiFetch } from "@/constants/api";
-import { colors, colorTokens, radius, spacing } from "@/constants/tokens";
+import { colors, colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -27,6 +27,17 @@ type LinkedDevice = {
 type DeviceStatusResponse = {
   status: "linked" | "unlinked";
 };
+
+/** 開発用: `true` にすると連携APIを叩かず、連携済みUIだけ確認できる（本番では常に無効）。 */
+const PREVIEW_SMARTWATCH_LINKED_UI = __DEV__ && false;
+
+const MOCK_LINKED_DEVICES_FOR_PREVIEW: LinkedDevice[] = [
+  {
+    device_id: "PREVIEW-WATCH-9F3A",
+    linked_at: "2026-05-01T10:15:00.000Z",
+    last_used_at: "2026-05-06T14:22:00.000Z",
+  },
+];
 
 function formatDeviceDate(value: string | null): string {
   if (!value) return "未使用";
@@ -58,6 +69,12 @@ export default function Settings() {
   );
 
   const fetchLinkedDevices = useCallback(async () => {
+    if (PREVIEW_SMARTWATCH_LINKED_UI) {
+      setDeviceError(null);
+      setLinkedDevices(MOCK_LINKED_DEVICES_FOR_PREVIEW);
+      return;
+    }
+
     if (isGuest || !authHeaders) {
       setLinkedDevices([]);
       setDeviceError(null);
@@ -128,10 +145,15 @@ export default function Settings() {
   }
 
   async function handleUnlinkDevice(deviceId: string) {
-    if (!authHeaders || unlinkingDeviceId) return;
+    if ((!authHeaders && !PREVIEW_SMARTWATCH_LINKED_UI) || unlinkingDeviceId) return;
 
     setUnlinkingDeviceId(deviceId);
     try {
+      if (PREVIEW_SMARTWATCH_LINKED_UI) {
+        setLinkedDevices((devices) => devices.filter((device) => device.device_id !== deviceId));
+        return;
+      }
+
       await apiFetch<DeviceStatusResponse>(`/device/links/${encodeURIComponent(deviceId)}`, {
         method: "DELETE",
         headers: authHeaders,
@@ -208,7 +230,7 @@ export default function Settings() {
       <ScrollView contentContainerStyle={styles.wrapper}>
         <Text style={styles.heading}>設定</Text>
 
-        {!isGuest && (
+        {(!isGuest || PREVIEW_SMARTWATCH_LINKED_UI) && (
           <View style={styles.deviceSection}>
             <View style={styles.deviceConnectContainer}>
               <Text style={styles.labelText}>スマートウォッチ連携</Text>
@@ -295,9 +317,8 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: colorTokens.tertiary,
-    fontSize: 22,
-    fontWeight: "700",
-    letterSpacing: 2,
+    ...fontFamily.kiwiMaruMedium,
+    fontSize: fontSize.maximum,
   },
   loginBtn: {
     borderRadius: radius.md,
@@ -309,26 +330,26 @@ const styles = StyleSheet.create({
   },
   loginText: {
     color: colorTokens.tertiary,
-    fontWeight: "600",
-    fontSize: 15,
+    ...fontFamily.kiwiMaruRegular,
+    fontSize: fontSize.large,
   },
   logoutBtn: {
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colorTokens.destructive,
-    paddingVertical: 12,
+    borderColor: colorTokens.destructiveForeground,
+    paddingVertical: 10,
     alignItems: "center",
     marginTop: spacing.md,
   },
   logoutText: {
     color: colorTokens.destructive,
-    fontWeight: "600",
-    fontSize: 15,
+    ...fontFamily.kiwiMaruRegular,
+    fontSize: fontSize.medium,
   },
   labelText: {
     color: colorTokens.tertiary,
-    fontSize: 16,
-    fontWeight: "600",
+    ...fontFamily.kiwiMaruMedium,
+    fontSize: fontSize.large,
   },
   deviceSection: {
     gap: spacing.sm,
@@ -359,13 +380,13 @@ const styles = StyleSheet.create({
   },
   deviceConnectText: {
     color: colorTokens.background,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruMedium,
   },
   deviceDisconnectText: {
     color: colorTokens.tertiary,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
   },
   deviceStateRow: {
     flexDirection: "row",
@@ -378,12 +399,14 @@ const styles = StyleSheet.create({
   },
   deviceStateText: {
     color: colorTokens.mutedText,
-    fontSize: 13,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
   },
   deviceErrorText: {
     flex: 1,
     color: colorTokens.destructive,
-    fontSize: 13,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
   },
   retryBtn: {
     borderWidth: 1,
@@ -394,12 +417,13 @@ const styles = StyleSheet.create({
   },
   retryText: {
     color: colorTokens.primaryForeground,
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruMedium,
   },
   emptyDeviceText: {
     color: colorTokens.mutedText,
-    fontSize: 13,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
     paddingVertical: spacing.sm,
   },
   deviceList: {
@@ -421,12 +445,13 @@ const styles = StyleSheet.create({
   },
   deviceIdText: {
     color: colorTokens.tertiary,
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruMedium,
   },
   deviceMetaText: {
     color: colorTokens.mutedText,
-    fontSize: 12,
+    fontSize: fontSize.minimum,
+    ...fontFamily.kiwiMaruRegular,
   },
   modalOverlay: {
     flex: 1,
@@ -446,13 +471,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: colorTokens.tertiary,
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: fontSize.large,
+    ...fontFamily.kiwiMaruMedium,
   },
   modalSubtitle: {
     color: colorTokens.mutedText,
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
   },
   pairingInput: {
     backgroundColor: colorTokens.darkBackground,
@@ -481,8 +506,8 @@ const styles = StyleSheet.create({
   },
   modalCancelText: {
     color: colorTokens.mutedText,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruMedium,
   },
   modalSubmitBtn: {
     paddingVertical: 10,
@@ -496,7 +521,7 @@ const styles = StyleSheet.create({
   },
   modalSubmitText: {
     color: colorTokens.background,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruMedium,
   },
 });
