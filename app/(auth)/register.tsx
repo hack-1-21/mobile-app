@@ -68,6 +68,16 @@ export default function RegisterScreen() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={styles.form}>
+          <Text style={styles.label}>ニックネーム</Text>
+          <TextInput
+            style={styles.input}
+            value={nickname}
+            onChangeText={setNickname}
+            placeholder="表示名"
+            placeholderTextColor={colors.muted}
+            autoCorrect={false}
+          />
+
           <Text style={styles.label}>メールアドレス</Text>
           <TextInput
             style={styles.input}
@@ -79,16 +89,6 @@ export default function RegisterScreen() {
             autoCorrect={false}
             keyboardType="email-address"
             textContentType="emailAddress"
-          />
-
-          <Text style={styles.label}>ニックネーム</Text>
-          <TextInput
-            style={styles.input}
-            value={nickname}
-            onChangeText={setNickname}
-            placeholder="表示名"
-            placeholderTextColor={colors.muted}
-            autoCorrect={false}
           />
 
           <Text style={styles.label}>パスワード</Text>
