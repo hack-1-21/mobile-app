@@ -170,7 +170,7 @@ export default function Settings() {
                 value={pairingCode}
                 onChangeText={(value) => setPairingCode(value.toUpperCase())}
                 placeholder="例: NFHH-9927"
-                placeholderTextColor={colors.muted}
+                placeholderTextColor={colorTokens.mutedText}
                 autoCapitalize="characters"
                 autoCorrect={false}
                 maxLength={9}
@@ -194,7 +194,7 @@ export default function Settings() {
                   disabled={!normalizedPairingCode || isSubmittingPairing}
                 >
                   {isSubmittingPairing ? (
-                    <ActivityIndicator color={colors.bgPage} />
+                    <ActivityIndicator color={colorTokens.tertiary} />
                   ) : (
                     <Text style={styles.modalSubmitText}>連携する</Text>
                   )}
@@ -222,7 +222,7 @@ export default function Settings() {
 
             {isLoadingDevices ? (
               <View style={styles.deviceStateRow}>
-                <ActivityIndicator color={colors.primary} />
+                <ActivityIndicator color={colorTokens.secondary} />
                 <Text style={styles.deviceStateText}>連携中の時計を取得しています</Text>
               </View>
             ) : deviceError ? (
@@ -259,7 +259,7 @@ export default function Settings() {
                       disabled={unlinkingDeviceId !== null}
                     >
                       {unlinkingDeviceId === device.device_id ? (
-                        <ActivityIndicator color={colors.primary} />
+                        <ActivityIndicator color={colorTokens.secondary} />
                       ) : (
                         <Text style={styles.deviceDisconnectText}>解除</Text>
                       )}
