@@ -27,7 +27,7 @@ export default function Hakoniwa() {
           <View style={styles.pointsRow}>
             <View style={styles.pointsBubble}>
               <StarIcon
-                size={20}
+                size={24}
                 color={colorTokens.hudText}
                 strokeColor={colorTokens.primaryForeground}
               />
@@ -40,7 +40,8 @@ export default function Hakoniwa() {
               </View>
               <Text style={styles.pointsValue}>{pointsText}</Text>
             </View>
-          </View></View>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    resizeMode: "contain",
+    resizeMode: "cover",
     maxWidth: "100%",
     maxHeight: "100%",
     borderRadius: 30,
