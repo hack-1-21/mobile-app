@@ -94,11 +94,14 @@ export const colorTokens = {
   hudProgressTrack: "#C9C9C9",
   hudAvatarFill: "#B3B3B3",
   hudText: "#FFFFFF",
+  darkBackground: "#131B31",
+  hakoniwaBorder: "#887040",
 } as const;
 
 export const fontSize = {
   maximum: 24,
   large: 16,
+  medium: 13,
   minimum: 10,
 } as const;
 
