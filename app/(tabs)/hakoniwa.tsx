@@ -13,7 +13,6 @@ const IMAGE_BASE_URL = "https://server-production-5adf.up.railway.app/images/gar
 export default function Hakoniwa() {
   const { user } = useAuth();
   const imageSource = `${IMAGE_BASE_URL}/${user?.user_id}/${user?.user_id}.png`;
-  console.log(imageSource);
   const { points } = usePlayerProfile();
   const pointsText = `${points.toLocaleString()}/${POINTS_MAX}`;
   const progress = points / POINTS_MAX;

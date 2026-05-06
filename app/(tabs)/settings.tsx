@@ -1,6 +1,6 @@
-import { ApiError, apiFetch } from "@/constants/api";
 import PlayerHUD from "@/components/PlayerHUD";
-import { colors, radius, spacing } from "@/constants/tokens";
+import { ApiError, apiFetch } from "@/constants/api";
+import { colors, colorTokens, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -160,7 +160,7 @@ export default function Settings() {
       >
         <Pressable style={styles.modalOverlay} onPress={handlePairingCancel}>
           <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Pressable style={styles.modalCard} onPress={() => { }}>
               <Text style={styles.modalTitle}>スマートウォッチを連携</Text>
               <Text style={styles.modalSubtitle}>
                 デバイスに表示されているペアリングコードを入力してください
@@ -188,7 +188,7 @@ export default function Settings() {
                   style={[
                     styles.modalSubmitBtn,
                     (!normalizedPairingCode || isSubmittingPairing) &&
-                      styles.modalSubmitBtnDisabled,
+                    styles.modalSubmitBtnDisabled,
                   ]}
                   onPress={handlePairingSubmit}
                   disabled={!normalizedPairingCode || isSubmittingPairing}
@@ -286,14 +286,15 @@ export default function Settings() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bgPage,
+    backgroundColor: colorTokens.darkBackground,
   },
   wrapper: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
+    paddingTop: spacing.md,
   },
   heading: {
-    color: colors.primary,
+    color: colorTokens.tertiary,
     fontSize: 22,
     fontWeight: "700",
     letterSpacing: 2,
@@ -301,31 +302,31 @@ const styles = StyleSheet.create({
   loginBtn: {
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.primaryA50,
+    borderColor: colorTokens.primaryForeground,
     paddingVertical: 12,
     alignItems: "center",
     marginTop: spacing.md,
   },
   loginText: {
-    color: colors.primary,
+    color: colorTokens.tertiary,
     fontWeight: "600",
     fontSize: 15,
   },
   logoutBtn: {
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "rgba(255,107,107,0.4)",
+    borderColor: colorTokens.destructive,
     paddingVertical: 12,
     alignItems: "center",
     marginTop: spacing.md,
   },
   logoutText: {
-    color: "#FF6B6B",
+    color: colorTokens.destructive,
     fontWeight: "600",
     fontSize: 15,
   },
   labelText: {
-    color: colors.textLight,
+    color: colorTokens.tertiary,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -350,19 +351,19 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   connectedBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: colorTokens.primaryForeground,
   },
   disconnectedBtn: {
-    borderColor: colors.primaryA50,
+    borderColor: colorTokens.mutedText,
     borderWidth: 1,
   },
   deviceConnectText: {
-    color: colors.bgPage,
+    color: colorTokens.background,
     fontSize: 14,
     fontWeight: "600",
   },
   deviceDisconnectText: {
-    color: colors.primary,
+    color: colorTokens.tertiary,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -371,17 +372,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.primaryA15,
+    borderColor: colorTokens.tertiary,
     borderRadius: radius.sm,
     padding: spacing.md,
   },
   deviceStateText: {
-    color: colors.muted,
+    color: colorTokens.mutedText,
     fontSize: 13,
   },
   deviceErrorText: {
     flex: 1,
-    color: "#FF8A8A",
+    color: colorTokens.destructive,
     fontSize: 13,
   },
   retryBtn: {
@@ -392,12 +393,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   retryText: {
-    color: colors.primary,
+    color: colorTokens.primaryForeground,
     fontSize: 13,
     fontWeight: "600",
   },
   emptyDeviceText: {
-    color: colors.muted,
+    color: colorTokens.mutedText,
     fontSize: 13,
     paddingVertical: spacing.sm,
   },
@@ -410,7 +411,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: spacing.md,
     borderWidth: 1,
-    borderColor: colors.primaryA15,
+    borderColor: colorTokens.primary,
     borderRadius: radius.sm,
     padding: spacing.md,
   },
@@ -419,48 +420,48 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deviceIdText: {
-    color: colors.textLight,
+    color: colorTokens.tertiary,
     fontSize: 13,
     fontWeight: "700",
   },
   deviceMetaText: {
-    color: colors.muted,
+    color: colorTokens.mutedText,
     fontSize: 12,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: colors.bgOverlay,
+    backgroundColor: colorTokens.overlayBackground,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: spacing.lg,
   },
   modalCard: {
     width: "100%",
-    backgroundColor: colors.bgPanel,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.primaryA25,
+    backgroundColor: colorTokens.darkBackground,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: colorTokens.primaryForeground,
     padding: spacing.lg,
     gap: spacing.md,
   },
   modalTitle: {
-    color: colors.textLight,
+    color: colorTokens.tertiary,
     fontSize: 18,
     fontWeight: "700",
   },
   modalSubtitle: {
-    color: colors.muted,
+    color: colorTokens.mutedText,
     fontSize: 13,
     lineHeight: 20,
   },
   pairingInput: {
-    backgroundColor: colors.primaryA08,
+    backgroundColor: colorTokens.darkBackground,
     borderWidth: 1,
-    borderColor: colors.primaryA30,
+    borderColor: colorTokens.primaryForeground,
     borderRadius: radius.sm,
     paddingVertical: 12,
     paddingHorizontal: spacing.md,
-    color: colors.textLight,
+    color: colorTokens.tertiary,
     fontSize: 20,
     fontWeight: "700",
     letterSpacing: 4,
@@ -476,10 +477,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.primaryA25,
+    borderColor: colorTokens.mutedText,
   },
   modalCancelText: {
-    color: colors.primary,
+    color: colorTokens.mutedText,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -487,13 +488,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: spacing.md,
     borderRadius: radius.sm,
-    backgroundColor: colors.primary,
+    backgroundColor: colorTokens.primaryForeground,
   },
   modalSubmitBtnDisabled: {
-    backgroundColor: colors.primaryA30,
+    backgroundColor: colorTokens.primaryForeground,
+    opacity: 0.5,
   },
   modalSubmitText: {
-    color: colors.bgPage,
+    color: colorTokens.background,
     fontSize: 14,
     fontWeight: "600",
   },
