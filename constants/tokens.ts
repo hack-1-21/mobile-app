@@ -81,7 +81,7 @@ export const radius = {
 export const colorTokens = {
   primary: "#1A40A8",
   primaryForeground: "#3769F0",
-  secondary: "#7EA0FF",
+  secondary: "#7190E4",
   tertiary: "#EDF2FF",
   foreground: "#3D3D3D",
   background: "#FFFFFF",

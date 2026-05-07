@@ -3,6 +3,7 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { BookIcon } from "./icons/BookIcon";
 import { PinIcon } from "./icons/PinIcon";
 import { TreeIcon } from "./icons/TreeIcon";
@@ -38,6 +39,33 @@ function TabIcon({ type, isActive }: { type: string; isActive: boolean }) {
   }
 }
 
+const SEPARATOR_WIDTH = 1;
+const SEPARATOR_HEIGHT = 56;
+
+function TabSeparator({ gradientId }: { gradientId: string }) {
+  return (
+    <View style={styles.separatorWrap} pointerEvents="none">
+      <Svg width={SEPARATOR_WIDTH} height={SEPARATOR_HEIGHT}>
+        <Defs>
+          <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0%" stopColor={colorTokens.secondary} stopOpacity={1} />
+            <Stop offset="50%" stopColor={colorTokens.tertiary} stopOpacity={1} />
+            <Stop offset="100%" stopColor={colorTokens.secondary} stopOpacity={1} />
+          </LinearGradient>
+        </Defs>
+        <Rect
+          x={0}
+          y={0}
+          width={SEPARATOR_WIDTH}
+          height={SEPARATOR_HEIGHT}
+          rx={1}
+          fill={`url(#${gradientId})`}
+        />
+      </Svg>
+    </View>
+  );
+}
+
 function TabItem({ label, tab, isActive, onPress }: TabItemProps) {
   return (
     <Pressable
@@ -66,24 +94,29 @@ export function GameTabBar({ state, descriptors, navigation }: BottomTabBarProps
           const { options } = descriptors[route.key];
           const label = TAB_LABELS[route.name] ?? options.title ?? route.name;
           const isActive = state.index === index;
+          const showSeparatorAfter = index < state.routes.length - 1;
 
           return (
-            <TabItem
-              key={route.key}
-              label={label}
-              tab={route.name}
-              isActive={isActive}
-              onPress={() => {
-                const event = navigation.emit({
-                  type: "tabPress",
-                  target: route.key,
-                  canPreventDefault: true,
-                });
-                if (!isActive && !event.defaultPrevented) {
-                  navigation.navigate(route.name);
-                }
-              }}
-            />
+            <React.Fragment key={route.key}>
+              <View style={styles.tabSlot}>
+                <TabItem
+                  label={label}
+                  tab={route.name}
+                  isActive={isActive}
+                  onPress={() => {
+                    const event = navigation.emit({
+                      type: "tabPress",
+                      target: route.key,
+                      canPreventDefault: true,
+                    });
+                    if (!isActive && !event.defaultPrevented) {
+                      navigation.navigate(route.name);
+                    }
+                  }}
+                />
+              </View>
+              {showSeparatorAfter ? <TabSeparator gradientId={`game-tab-sep-${index}`} /> : null}
+            </React.Fragment>
           );
         })}
       </View>
@@ -100,10 +133,20 @@ const styles = StyleSheet.create({
   },
   container: {
     flexDirection: "row",
+    alignItems: "center",
     position: "relative",
     paddingTop: 6,
     paddingBottom: 4,
-    justifyContent: "space-evenly",
+  },
+  tabSlot: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  separatorWrap: {
+    height: 72,
+    justifyContent: "center",
+    alignItems: "center",
   },
   tabPressable: {
     alignItems: "center",

@@ -1,11 +1,15 @@
-import { colors } from "@/constants/tokens";
+import PlayerHUD from "@/components/PlayerHUD";
+import { colorTokens, fontFamily, fontSize, spacing } from "@/constants/tokens";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function Collection() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>図鑑</Text>
+      <PlayerHUD />
+      <View style={styles.content}>
+        <Text style={styles.text}>図鑑</Text>
+      </View>
     </View>
   );
 }
@@ -13,13 +17,16 @@ export default function Collection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.bgPage,
+    backgroundColor: colorTokens.darkBackground,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   text: {
-    color: colors.primary,
-    fontSize: 24,
-    letterSpacing: 2,
+    color: colorTokens.tertiary,
+    fontSize: fontSize.maximum,
+    ...fontFamily.kiwiMaruMedium,
   },
 });

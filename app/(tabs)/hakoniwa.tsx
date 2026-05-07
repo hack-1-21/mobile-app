@@ -1,12 +1,16 @@
 import { StarIcon } from "@/components/icons/StarIcon";
+import { StarLineIcon } from "@/components/icons/StarLineIcon";
 import PlayerHUD from "@/components/PlayerHUD";
 import { colorTokens, fontFamily, fontSize } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { Image, StyleSheet, Text, View } from "react-native";
 
-const POINTS_MAX = 100;
+const POINTS_MAX = 1000;
 const POINTS_OUTLINE_SIZE = 2;
+
+const STAGE_2_POINTS = 400;
+const STAGE_3_POINTS = 800;
 
 const IMAGE_BASE_URL = "https://server-production-5adf.up.railway.app/images/gardens";
 
@@ -16,12 +20,17 @@ export default function Hakoniwa() {
   const { points } = usePlayerProfile();
   const pointsText = `${points.toLocaleString()}/${POINTS_MAX}`;
   const progress = points / POINTS_MAX;
-
+  const stage = points < STAGE_2_POINTS ? 1 : points < STAGE_3_POINTS ? 2 : 3;
   return (
     <View style={styles.container}>
       <PlayerHUD />
 
       <View style={styles.imageContainer}>
+        <View style={styles.starLinesContainer}>
+          <StarLineIcon size={36} fillColor={stage >= 1 ? colorTokens.hudProgressFill : colorTokens.hakoniwaBorder} strokeColor={colorTokens.hakoniwaBorder} />
+          <StarLineIcon size={36} fillColor={stage >= 2 ? colorTokens.hudProgressFill : colorTokens.mutedText} strokeColor={colorTokens.hakoniwaBorder} />
+          <StarLineIcon size={36} fillColor={stage >= 3 ? colorTokens.hudProgressFill : colorTokens.mutedText} strokeColor={colorTokens.hakoniwaBorder} />
+        </View>
         <Image source={{ uri: imageSource }} style={styles.image} />
         <View style={styles.pointsContainer}>
           <View style={styles.pointsRow}>
@@ -68,8 +77,19 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 5,
     borderColor: colorTokens.hakoniwaBorder,
-    width: "100%",
+    aspectRatio: 1,
     height: "100%",
+  },
+  starLinesContainer: {
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colorTokens.tertiary,
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 6,
+    marginBottom: 14,
   },
   pointsContainer: {
     paddingHorizontal: 16,
