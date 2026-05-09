@@ -4,11 +4,14 @@ import { PrevArrowIcon } from "@/components/icons/PrevArrowIcon";
 import PlayerHUD from "@/components/PlayerHUD";
 import { colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
 import { useGardenHistory } from "@/hooks/useGardenHistory";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useMemo, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const PAGE_SIZE = 9;
+
+const IMAGE_BASE_URL = "https://server-production-5adf.up.railway.app";
 
 function formatGardenDate(iso: string): string {
   const d = new Date(iso);
@@ -103,9 +106,9 @@ export default function Collection() {
                       />
                     </TouchableOpacity>
                     <Image
-                      source={{ uri: selectedItem.image_url }}
+                      source={{ uri: `${IMAGE_BASE_URL}${selectedItem.image_url}` }}
                       style={styles.detailImage}
-                      resizeMode="contain"
+                      cachePolicy={"none"}
                     />
                     <TouchableOpacity
                       onPress={handleNextItem}
@@ -152,9 +155,9 @@ export default function Collection() {
                           >
                             {hasImage && item ? (
                               <Image
-                                source={{ uri: item.image_url }}
+                                source={{ uri: `${IMAGE_BASE_URL}${item.image_url}` }}
                                 style={styles.collectionImage}
-                                resizeMode="cover"
+                                cachePolicy={"none"}
                               />
                             ) : (
                               <PlusIcon size={28} color={colorTokens.blueToneDown} />
@@ -368,6 +371,7 @@ const styles = StyleSheet.create({
   detailImage: {
     flex: 1,
     height: "100%",
+    resizeMode: "cover",
     borderRadius: radius.lg,
   },
   detailDateText: {

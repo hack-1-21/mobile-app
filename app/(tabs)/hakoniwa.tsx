@@ -64,7 +64,7 @@ export default function Hakoniwa() {
           placeholder={GARDEN_IMAGE_PLACEHOLDER}
           placeholderContentFit="cover"
           transition={220}
-          cachePolicy="disk"
+          cachePolicy="none"
         />
         <View style={styles.pointsContainer}>
           <View style={styles.pointsRow}>
