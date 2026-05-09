@@ -72,7 +72,8 @@ export const radius = {
   xs: 4,
   sm: 8,
   md: 12,
-  lg: 14,
+  lg: 16,
+  xl: 30,
   full: 9999,
 } as const;
 
@@ -100,6 +101,7 @@ export const colorTokens = {
   destructiveForeground: "#e4807c",
   mutedText: "#BBBBBB",
   overlayBackground: "rgba(0,0,0,0.50)",
+  blueToneDown: "#3A518F",
 } as const;
 
 export const fontSize = {
