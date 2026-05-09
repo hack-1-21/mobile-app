@@ -97,7 +97,7 @@ export const colorTokens = {
   hudText: "#FFFFFF",
   darkBackground: "#131B31",
   hakoniwaBorder: "#887040",
-  destructive: "#FF6B6B",
+  destructive: "#FF8D8D",
   destructiveForeground: "#e4807c",
   mutedText: "#BBBBBB",
   overlayBackground: "rgba(0,0,0,0.50)",

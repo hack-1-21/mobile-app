@@ -2,6 +2,7 @@ import PlayerHUD from "@/components/PlayerHUD";
 import { ApiError, apiFetch } from "@/constants/api";
 import { colors, colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
+import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -182,7 +183,7 @@ export default function Settings() {
       >
         <Pressable style={styles.modalOverlay} onPress={handlePairingCancel}>
           <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Pressable style={styles.modalCard} onPress={() => { }}>
               <Text style={styles.modalTitle}>スマートウォッチを連携</Text>
               <Text style={styles.modalSubtitle}>
                 デバイスに表示されているペアリングコードを入力してください
@@ -210,7 +211,7 @@ export default function Settings() {
                   style={[
                     styles.modalSubmitBtn,
                     (!normalizedPairingCode || isSubmittingPairing) &&
-                      styles.modalSubmitBtnDisabled,
+                    styles.modalSubmitBtnDisabled,
                   ]}
                   onPress={handlePairingSubmit}
                   disabled={!normalizedPairingCode || isSubmittingPairing}
@@ -235,10 +236,16 @@ export default function Settings() {
             <View style={styles.deviceConnectContainer}>
               <Text style={styles.labelText}>スマートウォッチ連携</Text>
               <TouchableOpacity
-                style={[styles.deviceConnectBtn, styles.connectedBtn]}
                 onPress={() => setPairingModalVisible(true)}
               >
-                <Text style={styles.deviceConnectText}>連携する</Text>
+                <LinearGradient
+                  colors={[colorTokens.primaryForeground, colorTokens.secondary]}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={styles.deviceConnectBtn}
+                >
+                  <Text style={styles.deviceConnectText}>連携する</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
 
@@ -318,7 +325,8 @@ const styles = StyleSheet.create({
   heading: {
     color: colorTokens.tertiary,
     ...fontFamily.kiwiMaruMedium,
-    fontSize: fontSize.maximum,
+    fontSize: 30,
+    textAlign: "center",
   },
   loginBtn: {
     borderRadius: radius.md,
@@ -364,9 +372,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   deviceConnectBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: radius.sm,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 10,
   },
   deviceConnectBtnDisabled: {
     opacity: 0.55,
@@ -380,7 +388,7 @@ const styles = StyleSheet.create({
   },
   deviceConnectText: {
     color: colorTokens.background,
-    fontSize: fontSize.medium,
+    fontSize: fontSize.large,
     ...fontFamily.kiwiMaruMedium,
   },
   deviceDisconnectText: {
