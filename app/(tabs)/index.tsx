@@ -1,6 +1,6 @@
 import FloatingButton from "@/components/FloatingButton";
-import { MenuIcon } from "@/components/icons/MenuIcon";
 import { PinIcon } from "@/components/icons/PinIcon";
+import MapMenuPill from "@/components/MapMenuPill";
 import MapOptionsDrawer, { MapOptions } from "@/components/MapOptionsDrawer";
 import PlayerHUD from "@/components/PlayerHUD";
 import { darkMapStyle, lightMapStyle } from "@/constants/mapStyle";
@@ -11,6 +11,7 @@ import * as Location from "expo-location";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ClipPath, Defs, G, Path, Svg } from "react-native-svg";
 import { buildHexGrid, hexVertices, latLngToHexKey } from "../../utils/hexGrid";
 import { getCellSize, getZoomLevel, weightToColor } from "../../utils/mapUtils";
@@ -48,10 +49,13 @@ const EDGE_NEIGHBORS: [number, number][] = [
 
 export default function App() {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [cellSize, setCellSize] = useState(INITIAL_CELL_SIZE);
   const [region, setRegion] = useState<Region>(INITIAL_REGION);
   const [mapDims, setMapDims] = useState({ width: 0, height: 0 });
   const [optionsVisible, setOptionsVisible] = useState(false);
+  const [menuExpanded, setMenuExpanded] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [mapOptions, setMapOptions] = useState<MapOptions>({
     showHexGrid: true,
@@ -59,6 +63,7 @@ export default function App() {
   const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(
     null,
   );
+  const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const showsExplorationMap = isDark;
   const showsGradientGrid = !isDark;
   const publicSoundData = useTiledSoundData(region, showsGradientGrid ? undefined : null);
@@ -85,7 +90,32 @@ export default function App() {
 
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (!alive || status !== "granted") return;
+      if (!alive) return;
+      if (status !== "granted") {
+        setInitialRegion(INITIAL_REGION);
+        return;
+      }
+
+      try {
+        const loc = await Location.getCurrentPositionAsync({});
+        if (!alive) return;
+        const coords = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+        };
+        const userRegion: Region = {
+          ...coords,
+          latitudeDelta: INITIAL_REGION.latitudeDelta,
+          longitudeDelta: INITIAL_REGION.longitudeDelta,
+        };
+        setUserCoords(coords);
+        setRegion(userRegion);
+        setInitialRegion(userRegion);
+      } catch {
+        if (alive) setInitialRegion(INITIAL_REGION);
+      }
+
+      if (!alive) return;
       const next = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.Balanced,
@@ -113,25 +143,6 @@ export default function App() {
     };
   }, []);
 
-  const handleMapReady = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") return;
-    const loc = await Location.getCurrentPositionAsync({});
-    setUserCoords({
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude,
-    });
-    mapRef.current?.animateToRegion(
-      {
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        latitudeDelta: INITIAL_REGION.latitudeDelta,
-        longitudeDelta: INITIAL_REGION.longitudeDelta,
-      },
-      800,
-    );
-  };
-
   const handleRegionChange = (newRegion: Region) => {
     setRegion(newRegion);
     const size = getCellSize(getZoomLevel(newRegion));
@@ -142,6 +153,18 @@ export default function App() {
 
   const handleOptionsChange = (next: Partial<MapOptions>) => {
     setMapOptions((prev) => ({ ...prev, ...next }));
+  };
+
+  const handleRecenter = () => {
+    if (!userCoords) return;
+    mapRef.current?.animateToRegion(
+      {
+        ...userCoords,
+        latitudeDelta: region.latitudeDelta,
+        longitudeDelta: region.longitudeDelta,
+      },
+      500,
+    );
   };
 
   const exploredKeys = useMemo(() => new Set(grid.map((c) => c.key)), [grid]);
@@ -245,49 +268,50 @@ export default function App() {
         })
       }
     >
-      <MapView
-        ref={mapRef}
-        style={StyleSheet.absoluteFillObject}
-        provider={PROVIDER_GOOGLE}
-        onRegionChangeComplete={handleRegionChange}
-        onMapReady={handleMapReady}
-        initialRegion={INITIAL_REGION}
-        customMapStyle={mapStyle}
-      >
-        {userCoords && (
-          <Marker coordinate={userCoords} anchor={{ x: 0.5, y: 1 }} tracksViewChanges={false}>
-            <PinIcon size={40} color={colorTokens.accent} />
-          </Marker>
-        )}
-        {fogOverlay && (
-          <Polygon
-            coordinates={fogOverlay.outer}
-            holes={fogOverlay.holes}
-            fillColor={colors.fogFill}
-            strokeWidth={0}
-            strokeColor="transparent"
-          />
-        )}
-        {mapOptions.showHexGrid &&
-          showsGradientGrid &&
-          grid.map((cell) => (
+      {initialRegion && (
+        <MapView
+          ref={mapRef}
+          style={StyleSheet.absoluteFillObject}
+          provider={PROVIDER_GOOGLE}
+          onRegionChangeComplete={handleRegionChange}
+          initialRegion={initialRegion}
+          customMapStyle={mapStyle}
+        >
+          {userCoords && (
+            <Marker coordinate={userCoords} anchor={{ x: 0.5, y: 1 }} tracksViewChanges={false}>
+              <PinIcon size={40} color={colorTokens.accent} />
+            </Marker>
+          )}
+          {fogOverlay && (
             <Polygon
-              key={cell.key}
-              coordinates={hexVertices(cell.centerLat, cell.centerLng, cellSize)}
-              fillColor={weightToColor(cell.weight)}
-              strokeWidth={0.5}
-              strokeColor={colors.hexStroke}
+              coordinates={fogOverlay.outer}
+              holes={fogOverlay.holes}
+              fillColor={colors.fogFill}
+              strokeWidth={0}
+              strokeColor="transparent"
+            />
+          )}
+          {mapOptions.showHexGrid &&
+            showsGradientGrid &&
+            grid.map((cell) => (
+              <Polygon
+                key={cell.key}
+                coordinates={hexVertices(cell.centerLat, cell.centerLng, cellSize)}
+                fillColor={weightToColor(cell.weight)}
+                strokeWidth={0.5}
+                strokeColor={colors.hexStroke}
+              />
+            ))}
+          {boundaryEdges.map((edge) => (
+            <Polyline
+              key={edge.key}
+              coordinates={edge.coords}
+              strokeColor={colorTokens.primary}
+              strokeWidth={2}
             />
           ))}
-        {boundaryEdges.map((edge) => (
-          <Polyline
-            key={edge.key}
-            coordinates={edge.coords}
-            strokeColor={colorTokens.primary}
-            strokeWidth={2}
-          />
-        ))}
-      </MapView>
+        </MapView>
+      )}
 
       {/* 霧エリア内だけに雲を描画する SVG オーバーレイ */}
       {showsExplorationMap && fogSvgPath !== "" && (
@@ -314,20 +338,35 @@ export default function App() {
         </View>
       )}
 
-      <PlayerHUD />
+      {!fullscreen && <PlayerHUD />}
 
-      <View style={styles.optionsButtonContainer}>
-        {/* マップオプションボタン (右上) */}
-        <TouchableOpacity
-          style={styles.optionsButton}
-          onPress={() => setOptionsVisible(true)}
-          activeOpacity={0.85}
-        >
-          <MenuIcon size={30} color={colorTokens.secondary} />
-        </TouchableOpacity>
+      <View style={[styles.menuPillContainer, { paddingTop: fullscreen ? insets.top : 10 }]} pointerEvents="box-none">
+        <MapMenuPill
+          expanded={menuExpanded}
+          onToggle={() => setMenuExpanded((v) => !v)}
+          onFullscreen={() => {
+            setFullscreen((v) => !v);
+            setMenuExpanded(false);
+          }}
+          onCustomize={() => {
+            setOptionsVisible(true);
+            setMenuExpanded(false);
+          }}
+        />
       </View>
 
-      <FloatingButton onPress={() => setIsDark((v) => !v)} />
+      {!fullscreen && userCoords && (
+        <TouchableOpacity
+          style={styles.recenterButton}
+          onPress={handleRecenter}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+        >
+          <PinIcon size={36} color={colorTokens.secondary} />
+        </TouchableOpacity>
+      )}
+
+      {!fullscreen && <FloatingButton onPress={() => setIsDark((v) => !v)} />}
 
       <MapOptionsDrawer
         visible={optionsVisible}
@@ -340,22 +379,25 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  optionsButtonContainer: {
-    flex: 1,
-    alignItems: "flex-end",
-    padding: 20,
+  menuPillContainer: {
+    alignSelf: "flex-end",
+    paddingRight: 20,
   },
-  optionsButton: {
-    borderRadius: 50,
+  recenterButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 100,
     width: 64,
     height: 64,
-    backgroundColor: colorTokens.tertiary,
+    borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: colorTokens.tertiary,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 8,
+    zIndex: 1000,
   },
 });
