@@ -23,4 +23,3 @@ export function StarLineIcon({
     </Svg>
   );
 }
-
