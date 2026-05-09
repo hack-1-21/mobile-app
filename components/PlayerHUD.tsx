@@ -1,5 +1,6 @@
 import { OutlinedText } from "@/components/OutlinedText";
 import { PencilIcon } from "@/components/icons/PencilIcon";
+import { RouteIcon } from "@/components/icons/RouteIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
 import { ApiError } from "@/constants/api";
 import { colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
@@ -26,7 +27,11 @@ const POINTS_MAX = 1000;
 const LEVEL_OUTLINE_SIZE = 4;
 const NICKNAME_MAX_LENGTH = 20;
 
-export default function PlayerHUD() {
+type PlayerHUDProps = {
+  onRoutePress?: () => void;
+};
+
+export default function PlayerHUD({ onRoutePress }: PlayerHUDProps) {
   const { nickname, level, xp, xpMax, points } = usePlayerProfile();
   const { isGuest, updateNickname } = useAuth();
   const progress = xpMax > 0 ? Math.min(xp / xpMax, 1) : 0;
@@ -128,6 +133,19 @@ export default function PlayerHUD() {
             </View>
           </View>
         </View>
+
+        {onRoutePress && (
+          <TouchableOpacity
+            style={styles.routeButton}
+            onPress={onRoutePress}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="ルート検索を開く"
+            activeOpacity={0.85}
+          >
+            <RouteIcon size={30} color={colorTokens.primaryForeground} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <Modal visible={editVisible} transparent animationType="fade" onRequestClose={closeEdit}>
@@ -184,6 +202,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   panel: {
+    position: "relative",
     paddingHorizontal: 20,
     paddingBottom: 18,
     backgroundColor: colorTokens.hudPanel,
@@ -286,12 +305,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginBottom: 8,
+    paddingRight: 58,
   },
   nickname: {
     ...fontFamily.kiwiMaruRegular,
     flexShrink: 1,
     color: colorTokens.hudText,
     fontSize: fontSize.maximum,
+  },
+  routeButton: {
+    position: "absolute",
+    right: 18,
+    bottom: 14,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: colorTokens.tertiary,
+    borderWidth: 3,
+    borderColor: colorTokens.primaryForeground,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: colorTokens.blueShadow,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.8,
+    shadowRadius: 5,
+    elevation: 8,
   },
   pointsPill: {
     alignSelf: "flex-start",
