@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
     ...fontFamily.kiwiMaruMedium,
     color: colorTokens.background,
     fontSize: 22,
-    lineHeight: 24,
+    lineHeight: 28,
   },
   routeInputGroup: {
     gap: 6,
