@@ -7,7 +7,7 @@ import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const POINTS_MAX = 100;
+const POINTS_MAX = 1000;
 const LEVEL_OUTLINE_SIZE = 4;
 
 export default function PlayerHUD() {
