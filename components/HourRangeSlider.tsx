@@ -1,4 +1,4 @@
-import { colors } from "@/constants/tokens";
+import { colorTokens } from "@/constants/tokens";
 import React, { useRef, useState } from "react";
 import {
   GestureResponderEvent,
@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
   track: {
     height: TRACK_HEIGHT,
     borderRadius: TRACK_HEIGHT / 2,
-    backgroundColor: colors.whiteA10,
+    backgroundColor: colorTokens.tertiary,
   },
   fill: {
     position: "absolute",
     top: TRACK_VERTICAL_PADDING,
     height: TRACK_HEIGHT,
-    backgroundColor: colors.primary,
+    backgroundColor: colorTokens.secondary,
     borderRadius: TRACK_HEIGHT / 2,
   },
   handle: {
@@ -142,10 +142,10 @@ const styles = StyleSheet.create({
     width: HANDLE_SIZE,
     height: HANDLE_SIZE,
     borderRadius: HANDLE_SIZE / 2,
-    backgroundColor: colors.primary,
+    backgroundColor: colorTokens.secondary,
     borderWidth: 2,
-    borderColor: colors.bgPanel,
-    shadowColor: colors.shadow,
+    borderColor: colorTokens.darkBackground,
+    shadowColor: colorTokens.secondary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,

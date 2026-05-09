@@ -1,11 +1,10 @@
-import { colors, radius } from "@/constants/tokens";
+import { colors, colorTokens, radius } from "@/constants/tokens";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Modal,
   Pressable,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -49,15 +48,6 @@ export default function MapOptionsDrawer({ visible, options, onClose, onChange }
 
         <Text style={styles.title}>マップ設定</Text>
 
-        <View style={styles.section}>
-          <OptionRow
-            label="ヘックスグリッド"
-            description="音データのオーバーレイ表示"
-            value={options.showHexGrid}
-            onToggle={(v) => onChange({ showHexGrid: v })}
-          />
-        </View>
-
         <View style={styles.timeSection}>
           <View style={styles.timeHeader}>
             <View style={styles.rowText}>
@@ -86,48 +76,21 @@ export default function MapOptionsDrawer({ visible, options, onClose, onChange }
   );
 }
 
-type OptionRowProps = {
-  label: string;
-  description: string;
-  value: boolean;
-  onToggle: (v: boolean) => void;
-};
-
-function OptionRow({ label, description, value, onToggle }: OptionRowProps) {
-  return (
-    <View style={styles.row}>
-      <View style={styles.rowText}>
-        <Text style={styles.rowLabel}>{label}</Text>
-        <Text style={styles.rowDesc}>{description}</Text>
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onToggle}
-        trackColor={{ false: colors.whiteA10, true: colors.primaryA50 }}
-        thumbColor={value ? colors.primary : colors.muted}
-        ios_backgroundColor={colors.whiteA10}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.bgOverlay,
+    backgroundColor: colorTokens.overlayBackground,
   },
   sheet: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors.bgPanel,
+    backgroundColor: colorTokens.darkBackground,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: 34,
     paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderColor: colors.primaryA15,
   },
   handle: {
     width: 36,
@@ -164,24 +127,24 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   rowLabel: {
-    color: colors.textLight,
+    color: colorTokens.tertiary,
     fontSize: 14,
     fontWeight: "600",
   },
   rowDesc: {
-    color: colors.textLightA45,
+    color: colorTokens.mutedText,
     fontSize: 11,
   },
   separator: {
     height: 1,
-    backgroundColor: colors.primaryA08,
+    backgroundColor: colorTokens.blueToneDown,
     marginHorizontal: 16,
   },
   timeSection: {
-    backgroundColor: colors.whiteA04,
+    backgroundColor: colorTokens.darkBackground,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.primaryA10,
+    borderColor: colorTokens.primary,
     paddingHorizontal: 16,
     paddingVertical: 16,
     marginBottom: 24,
@@ -193,7 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   timeValue: {
-    color: colors.primary,
+    color: colorTokens.secondary,
     fontSize: 14,
     fontWeight: "700",
     letterSpacing: 0.4,
@@ -205,20 +168,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   axisLabel: {
-    color: colors.textLightA45,
+    color: colorTokens.tertiary,
     fontSize: 10,
     fontVariant: ["tabular-nums"],
   },
   closeButton: {
-    backgroundColor: colors.primaryA12,
+    backgroundColor: colorTokens.blueToneDown,
     borderRadius: radius.md,
     paddingVertical: 13,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.primaryA20,
   },
   closeLabel: {
-    color: colors.primary,
+    color: colorTokens.tertiary,
     fontSize: 14,
     fontWeight: "700",
     letterSpacing: 0.5,

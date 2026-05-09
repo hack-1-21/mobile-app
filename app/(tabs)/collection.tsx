@@ -330,6 +330,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: radius.lg,
+    resizeMode: "contain",
   },
   detailContainer: {
     flex: 1,
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
   detailImage: {
     flex: 1,
     height: "100%",
-    resizeMode: "cover",
+    resizeMode: "contain",
     borderRadius: radius.lg,
   },
   detailDateText: {
