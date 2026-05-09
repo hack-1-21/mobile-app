@@ -59,6 +59,7 @@ export default function App() {
   const [isDark, setIsDark] = useState(false);
   const [mapOptions, setMapOptions] = useState<MapOptions>({
     showHexGrid: true,
+    timeRange: [0, 24],
   });
   const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(
     null,
@@ -71,9 +72,17 @@ export default function App() {
     region,
     showsExplorationMap ? user?.user_id || null : null,
   );
+  const filteredPublicSoundData = useMemo(() => {
+    const [startHour, endHour] = mapOptions.timeRange;
+    if (startHour <= 0 && endHour >= 24) return publicSoundData;
+    return publicSoundData.filter((p) => {
+      const hour = new Date(p.created_at).getHours();
+      return hour >= startHour && hour < endHour;
+    });
+  }, [publicSoundData, mapOptions.timeRange]);
   const publicGrid = useMemo(
-    () => buildHexGrid(publicSoundData, cellSize),
-    [publicSoundData, cellSize],
+    () => buildHexGrid(filteredPublicSoundData, cellSize),
+    [filteredPublicSoundData, cellSize],
   );
   const explorationGrid = useMemo(
     () => buildHexGrid(explorationSoundData, cellSize),
@@ -340,7 +349,10 @@ export default function App() {
 
       {!fullscreen && <PlayerHUD />}
 
-      <View style={[styles.menuPillContainer, { paddingTop: fullscreen ? insets.top : 10 }]} pointerEvents="box-none">
+      <View
+        style={[styles.menuPillContainer, { paddingTop: fullscreen ? insets.top : 10 }]}
+        pointerEvents="box-none"
+      >
         <MapMenuPill
           expanded={menuExpanded}
           onToggle={() => setMenuExpanded((v) => !v)}

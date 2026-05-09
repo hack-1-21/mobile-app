@@ -10,10 +10,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import HourRangeSlider from "./HourRangeSlider";
 
 export type MapOptions = {
   showHexGrid: boolean;
+  timeRange: [number, number];
 };
+
+const formatHour = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 type Props = {
   visible: boolean;
@@ -23,11 +27,11 @@ type Props = {
 };
 
 export default function MapOptionsDrawer({ visible, options, onClose, onChange }: Props) {
-  const slideY = useRef(new Animated.Value(320)).current;
+  const slideY = useRef(new Animated.Value(600)).current;
 
   useEffect(() => {
     Animated.spring(slideY, {
-      toValue: visible ? 0 : 320,
+      toValue: visible ? 0 : 600,
       useNativeDriver: true,
       bounciness: 4,
       speed: 18,
@@ -52,6 +56,26 @@ export default function MapOptionsDrawer({ visible, options, onClose, onChange }
             value={options.showHexGrid}
             onToggle={(v) => onChange({ showHexGrid: v })}
           />
+        </View>
+
+        <View style={styles.timeSection}>
+          <View style={styles.timeHeader}>
+            <View style={styles.rowText}>
+              <Text style={styles.rowLabel}>時間帯</Text>
+              <Text style={styles.rowDesc}>選択した時間に記録された音のみ表示</Text>
+            </View>
+            <Text style={styles.timeValue}>
+              {formatHour(options.timeRange[0])} – {formatHour(options.timeRange[1])}
+            </Text>
+          </View>
+          <HourRangeSlider value={options.timeRange} onChange={(v) => onChange({ timeRange: v })} />
+          <View style={styles.timeAxis}>
+            <Text style={styles.axisLabel}>0</Text>
+            <Text style={styles.axisLabel}>6</Text>
+            <Text style={styles.axisLabel}>12</Text>
+            <Text style={styles.axisLabel}>18</Text>
+            <Text style={styles.axisLabel}>24</Text>
+          </View>
         </View>
 
         <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.8}>
@@ -152,6 +176,38 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.primaryA08,
     marginHorizontal: 16,
+  },
+  timeSection: {
+    backgroundColor: colors.whiteA04,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.primaryA10,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginBottom: 24,
+    gap: 14,
+  },
+  timeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  timeValue: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+    fontVariant: ["tabular-nums"],
+  },
+  timeAxis: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
+  },
+  axisLabel: {
+    color: colors.textLightA45,
+    fontSize: 10,
+    fontVariant: ["tabular-nums"],
   },
   closeButton: {
     backgroundColor: colors.primaryA12,

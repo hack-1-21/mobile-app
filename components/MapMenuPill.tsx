@@ -1,6 +1,6 @@
-import { colorTokens, colors } from "@/constants/tokens";
+import { colorTokens, colors, radius } from "@/constants/tokens";
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Animated, StyleSheet, TouchableOpacity } from "react-native";
 import { FullscreenIcon } from "./icons/FullscreenIcon";
 import { MenuIcon } from "./icons/MenuIcon";
 import { WrenchIcon } from "./icons/WrenchIcon";
@@ -38,20 +38,18 @@ export default function MapMenuPill({ expanded, onToggle, onFullscreen, onCustom
 
   return (
     <Animated.View style={[styles.pill, { height: heightAnim }]}>
-      <TouchableOpacity style={styles.section} onPress={onToggle} activeOpacity={0.7}>
+      <TouchableOpacity style={styles.menuButton} onPress={onToggle} activeOpacity={0.7}>
         <MenuIcon size={30} color={colorTokens.secondary} />
       </TouchableOpacity>
       <Animated.View
         style={[styles.expandableArea, { opacity: itemOpacity }]}
         pointerEvents={expanded ? "auto" : "none"}
       >
-        <View style={styles.separator} />
-        <TouchableOpacity style={styles.section} onPress={onFullscreen} activeOpacity={0.7}>
-          <FullscreenIcon size={28} color={colorTokens.secondary} />
+        <TouchableOpacity style={[styles.section, styles.sectionButton]} onPress={onFullscreen} activeOpacity={0.7}>
+          <FullscreenIcon size={28} color={colorTokens.tertiary} />
         </TouchableOpacity>
-        <View style={styles.separator} />
-        <TouchableOpacity style={styles.section} onPress={onCustomize} activeOpacity={0.7}>
-          <WrenchIcon size={28} color={colorTokens.secondary} />
+        <TouchableOpacity style={[styles.section, styles.sectionButton]} onPress={onCustomize} activeOpacity={0.7}>
+          <WrenchIcon size={28} color={colorTokens.tertiary} />
         </TouchableOpacity>
       </Animated.View>
     </Animated.View>
@@ -70,19 +68,24 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  section: {
+  menuButton: {
     width: SECTION,
     height: SECTION,
     alignItems: "center",
     justifyContent: "center",
   },
-  expandableArea: {
-    width: SECTION,
+  section: {
+    width: SECTION - 8,
+    height: SECTION - 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  separator: {
-    width: SECTION - 20,
-    height: 1,
-    backgroundColor: colorTokens.blueShadowSecondary,
-    alignSelf: "center",
+  expandableArea: {
+    gap: 4,
+    paddingHorizontal: 4,
+  },
+  sectionButton: {
+    backgroundColor: colorTokens.secondary,
+    borderRadius: radius.full,
   },
 });
