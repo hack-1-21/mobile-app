@@ -22,7 +22,7 @@ const INITIAL_REGION: Region = {
   latitudeDelta: 0.05,
   longitudeDelta: 0.05,
 };
-const INITIAL_CELL_SIZE = 0.005;
+const INITIAL_CELL_SIZE = 0.00375;
 
 // kumo.svg のパスデータ (viewBox 216x97)
 const KUMO_PATH =
@@ -46,6 +46,35 @@ const EDGE_NEIGHBORS: [number, number][] = [
   [1, -1],
   [1, 0],
 ];
+
+type HexPolygonProps = {
+  centerLat: number;
+  centerLng: number;
+  cellSize: number;
+  weight: number;
+  strokeColor: string;
+};
+
+const HexPolygon = React.memo(function HexPolygon({
+  centerLat,
+  centerLng,
+  cellSize,
+  weight,
+  strokeColor,
+}: HexPolygonProps) {
+  const coordinates = useMemo(
+    () => hexVertices(centerLat, centerLng, cellSize),
+    [centerLat, centerLng, cellSize],
+  );
+  return (
+    <Polygon
+      coordinates={coordinates}
+      fillColor={weightToColor(weight)}
+      strokeWidth={0.5}
+      strokeColor={strokeColor}
+    />
+  );
+});
 
 export default function App() {
   const { user } = useAuth();
@@ -89,6 +118,24 @@ export default function App() {
     [explorationSoundData, cellSize],
   );
   const grid = showsExplorationMap ? explorationGrid : publicGrid;
+
+  // 描画する hex を viewport 内に限定 (off-screen の Polygon を作らない)
+  const visibleGrid = useMemo(() => {
+    if (!showsGradientGrid) return [];
+    const padLat = cellSize * 2;
+    const padLng = cellSize * 2.5;
+    const minLat = region.latitude - region.latitudeDelta / 2 - padLat;
+    const maxLat = region.latitude + region.latitudeDelta / 2 + padLat;
+    const minLng = region.longitude - region.longitudeDelta / 2 - padLng;
+    const maxLng = region.longitude + region.longitudeDelta / 2 + padLng;
+    return publicGrid.filter(
+      (c) =>
+        c.centerLat >= minLat &&
+        c.centerLat <= maxLat &&
+        c.centerLng >= minLng &&
+        c.centerLng <= maxLng,
+    );
+  }, [showsGradientGrid, publicGrid, region, cellSize]);
 
   const currentSizeRef = useRef(INITIAL_CELL_SIZE);
   const mapRef = useRef<MapView>(null);
@@ -302,12 +349,13 @@ export default function App() {
           )}
           {mapOptions.showHexGrid &&
             showsGradientGrid &&
-            grid.map((cell) => (
-              <Polygon
+            visibleGrid.map((cell) => (
+              <HexPolygon
                 key={cell.key}
-                coordinates={hexVertices(cell.centerLat, cell.centerLng, cellSize)}
-                fillColor={weightToColor(cell.weight)}
-                strokeWidth={0.5}
+                centerLat={cell.centerLat}
+                centerLng={cell.centerLng}
+                cellSize={cellSize}
+                weight={cell.weight}
                 strokeColor={colors.hexStroke}
               />
             ))}
