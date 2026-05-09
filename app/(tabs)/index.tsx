@@ -1,20 +1,36 @@
 import FloatingButton from "@/components/FloatingButton";
 import { PinIcon } from "@/components/icons/PinIcon";
+import { RouteIcon } from "@/components/icons/RouteIcon";
 import MapMenuPill from "@/components/MapMenuPill";
 import MapOptionsDrawer, { MapOptions } from "@/components/MapOptionsDrawer";
+import { PlaceInput, PlaceSelection } from "@/components/PlaceInput";
 import PlayerHUD from "@/components/PlayerHUD";
+import { apiFetch } from "@/constants/api";
 import { darkMapStyle, lightMapStyle } from "@/constants/mapStyle";
-import { colors, colorTokens } from "@/constants/tokens";
+import { colors, colorTokens, fontFamily } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { useTiledSoundData } from "@/hooks/useTiledSoundData";
 import * as Location from "expo-location";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ClipPath, Defs, G, Path, Svg } from "react-native-svg";
 import { buildHexGrid, hexVertices, latLngToHexKey } from "../../utils/hexGrid";
 import { getCellSize, getZoomLevel, weightToColor } from "../../utils/mapUtils";
+
+type QuietRouteCandidate = {
+  rank: number;
+  label: string;
+  distance_m: number;
+  duration_sec: number;
+  avg_db: number;
+  loud_spots: number;
+  quiet_score: number;
+  cost: number;
+  polyline: string;
+  points: { lat: number; lng: number }[];
+};
 
 const INITIAL_REGION: Region = {
   latitude: 35.6812,
@@ -86,6 +102,14 @@ export default function App() {
   const [menuExpanded, setMenuExpanded] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [routeSearchVisible, setRouteSearchVisible] = useState(false);
+  const [routeOrigin, setRouteOrigin] = useState<PlaceSelection>({ label: "現在地", location: null });
+  const [routeDestination, setRouteDestination] = useState<PlaceSelection>({ label: "", location: null });
+  const [routeMode, setRouteMode] = useState<"quiet" | "balanced" | "fast">("quiet");
+  const [routeResults, setRouteResults] = useState<QuietRouteCandidate[] | null>(null);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeError, setRouteError] = useState<string | null>(null);
+  const [selectedRouteIdx, setSelectedRouteIdx] = useState(0);
   const [mapOptions, setMapOptions] = useState<MapOptions>({
     showHexGrid: true,
     timeRange: [0, 24],
@@ -209,6 +233,46 @@ export default function App() {
 
   const handleOptionsChange = (next: Partial<MapOptions>) => {
     setMapOptions((prev) => ({ ...prev, ...next }));
+  };
+
+  const handleRouteSearch = async () => {
+    const originLoc =
+      routeOrigin.location ??
+      (routeOrigin.label === "現在地" && userCoords
+        ? { lat: userCoords.latitude, lng: userCoords.longitude }
+        : null);
+    const destLoc = routeDestination.location;
+
+    if (!originLoc || !destLoc) {
+      setRouteError("出発地と目的地を正しく選択してください");
+      return;
+    }
+
+    setRouteError(null);
+    setRouteLoading(true);
+    setRouteResults(null);
+    try {
+      const res = await apiFetch<{ routes: QuietRouteCandidate[] }>("/routes/quiet", {
+        method: "POST",
+        body: JSON.stringify({ origin: originLoc, destination: destLoc, mode: routeMode }),
+      });
+      setRouteResults(res.routes);
+      setSelectedRouteIdx(0);
+      if (res.routes[0]?.points.length) {
+        fitToRoute(res.routes[0].points);
+      }
+    } catch (e) {
+      setRouteError(e instanceof Error ? e.message : "ルート取得に失敗しました");
+    } finally {
+      setRouteLoading(false);
+    }
+  };
+
+  const fitToRoute = (points: { lat: number; lng: number }[]) => {
+    mapRef.current?.fitToCoordinates(
+      points.map((p) => ({ latitude: p.lat, longitude: p.lng })),
+      { edgePadding: { top: 80, right: 40, bottom: 320, left: 40 }, animated: true },
+    );
   };
 
   const handleRecenter = () => {
@@ -367,6 +431,20 @@ export default function App() {
               strokeWidth={2}
             />
           ))}
+          {routeResults && routeResults[selectedRouteIdx] && (
+            <Polyline
+              key={`route-${selectedRouteIdx}`}
+              coordinates={routeResults[selectedRouteIdx].points.map((p) => ({
+                latitude: p.lat,
+                longitude: p.lng,
+              }))}
+              strokeColor={colorTokens.accent}
+              strokeWidth={5}
+              lineCap="round"
+              lineJoin="round"
+              tappable={false}
+            />
+          )}
         </MapView>
       )}
 
@@ -395,24 +473,166 @@ export default function App() {
         </View>
       )}
 
-      {!fullscreen && <PlayerHUD />}
+      {!fullscreen && <PlayerHUD onRoutePress={() => setRouteSearchVisible(true)} />}
+
+      {routeSearchVisible && (
+        <View
+          style={[styles.routeSearchPanel, { paddingTop: insets.top + 10 }]}
+          pointerEvents="box-none"
+        >
+          <View style={styles.routeSearchCard}>
+            <View style={styles.routeSearchHeader}>
+              <View style={styles.routeTitleRow}>
+                <View style={styles.routeTitleIcon}>
+                  <RouteIcon size={22} color={colorTokens.primaryForeground} />
+                </View>
+                <Text style={styles.routeSearchTitle}>ルート検索</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.routeCloseButton}
+                onPress={() => setRouteSearchVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel="ルート検索を閉じる"
+              >
+                <Text style={styles.routeCloseText}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.routeInputGroup, { zIndex: 2 }]}>
+              <Text style={styles.routeInputLabel}>出発地</Text>
+              <PlaceInput
+                value={routeOrigin}
+                onChange={setRouteOrigin}
+                placeholder="現在地"
+                prefixOptions={
+                  userCoords
+                    ? [{ label: "現在地", location: { lat: userCoords.latitude, lng: userCoords.longitude } }]
+                    : []
+                }
+              />
+            </View>
+
+            <View style={[styles.routeInputGroup, { zIndex: 1 }]}>
+              <Text style={styles.routeInputLabel}>目的地</Text>
+              <PlaceInput
+                value={routeDestination}
+                onChange={setRouteDestination}
+                placeholder="目的地を入力"
+              />
+            </View>
+
+            <View style={styles.routeModeRow}>
+              {[
+                ["quiet", "静音優先"],
+                ["balanced", "バランス"],
+                ["fast", "最短"],
+              ].map(([value, label]) => {
+                const selected = routeMode === value;
+                return (
+                  <Pressable
+                    key={value}
+                    style={[styles.routeModeButton, selected && styles.routeModeButtonSelected]}
+                    onPress={() => setRouteMode(value as "quiet" | "balanced" | "fast")}
+                    accessibilityRole="button"
+                  >
+                    <Text
+                      style={[
+                        styles.routeModeText,
+                        selected && styles.routeModeTextSelected,
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {routeError && <Text style={styles.routeError}>{routeError}</Text>}
+
+            <TouchableOpacity
+              style={styles.routeSearchButton}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              onPress={handleRouteSearch}
+              disabled={routeLoading}
+            >
+              {routeLoading ? (
+                <ActivityIndicator size="small" color={colorTokens.background} />
+              ) : (
+                <Text style={styles.routeSearchButtonText}>ルート検索</Text>
+              )}
+            </TouchableOpacity>
+
+            {routeResults && (
+              <View style={styles.routeResultsContainer}>
+                {routeResults.map((route, idx) => (
+                  <TouchableOpacity
+                    key={route.rank}
+                    style={[
+                      styles.routeResultItem,
+                      idx === selectedRouteIdx && styles.routeResultItemSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedRouteIdx(idx);
+                      if (route.points.length) fitToRoute(route.points);
+                      setRouteSearchVisible(false);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.routeResultHeader}>
+                      <Text style={styles.routeResultLabel}>{route.label}</Text>
+                      <Text style={styles.routeResultScore}>静音 {route.quiet_score}</Text>
+                    </View>
+                    <Text style={styles.routeResultMeta}>
+                      {Math.round(route.distance_m / 10) / 100} km ·{" "}
+                      {Math.round(route.duration_sec / 60)} 分 · {route.avg_db} dB
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+      )}
 
       <View
-        style={[styles.menuPillContainer, { paddingTop: fullscreen ? insets.top : 10 }]}
+        style={[styles.mapTopRow, { paddingTop: fullscreen ? insets.top : 10 }]}
         pointerEvents="box-none"
       >
-        <MapMenuPill
-          expanded={menuExpanded}
-          onToggle={() => setMenuExpanded((v) => !v)}
-          onFullscreen={() => {
-            setFullscreen((v) => !v);
-            setMenuExpanded(false);
-          }}
-          onCustomize={() => {
-            setOptionsVisible(true);
-            setMenuExpanded(false);
-          }}
-        />
+        {!fullscreen && routeResults && routeResults[selectedRouteIdx] && (
+          <TouchableOpacity
+            style={styles.routeActiveBar}
+            onPress={() => {
+              setRouteResults(null);
+              setSelectedRouteIdx(0);
+            }}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="ルートを解除"
+          >
+            <Text style={styles.routeActiveBarText} numberOfLines={1}>
+              {routeResults[selectedRouteIdx].label} ·{" "}
+              {Math.round(routeResults[selectedRouteIdx].distance_m / 10) / 100} km ·{" "}
+              {Math.round(routeResults[selectedRouteIdx].duration_sec / 60)} 分
+            </Text>
+            <Text style={styles.routeActiveBarClose}>×</Text>
+          </TouchableOpacity>
+        )}
+        <View style={{ marginLeft: "auto" }}>
+          <MapMenuPill
+            expanded={menuExpanded}
+            onToggle={() => setMenuExpanded((v) => !v)}
+            onFullscreen={() => {
+              setFullscreen((v) => !v);
+              setMenuExpanded(false);
+            }}
+            onCustomize={() => {
+              setOptionsVisible(true);
+              setMenuExpanded(false);
+            }}
+          />
+        </View>
       </View>
 
       {!fullscreen && userCoords && (
@@ -439,9 +659,186 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  menuPillContainer: {
-    alignSelf: "flex-end",
+  routeSearchPanel: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    zIndex: 1300,
+  },
+  routeSearchCard: {
+    backgroundColor: colorTokens.hudPanel,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: colorTokens.primaryForeground,
+    padding: 14,
+    gap: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    elevation: 12,
+  },
+  routeSearchHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  routeTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    minWidth: 0,
+  },
+  routeTitleIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colorTokens.tertiary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  routeSearchTitle: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.hudText,
+    fontSize: 20,
+  },
+  routeCloseButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colorTokens.primaryForeground,
+  },
+  routeCloseText: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.background,
+    fontSize: 22,
+    lineHeight: 24,
+  },
+  routeInputGroup: {
+    gap: 6,
+  },
+  routeInputLabel: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.hudText,
+    fontSize: 13,
+  },
+  routeError: {
+    ...fontFamily.kiwiMaruRegular,
+    color: colorTokens.destructive,
+    fontSize: 12,
+  },
+  routeActiveBar: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colorTokens.hudPanel,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colorTokens.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  routeActiveBarText: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.hudText,
+    fontSize: 13,
+    flex: 1,
+  },
+  routeActiveBarClose: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.accent,
+    fontSize: 18,
+    marginLeft: 12,
+  },
+  routeResultsContainer: {
+    gap: 6,
+  },
+  routeResultItem: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colorTokens.blueToneDown,
+    backgroundColor: colorTokens.darkBackground,
+    padding: 10,
+    gap: 4,
+  },
+  routeResultItemSelected: {
+    borderColor: colorTokens.accent,
+    backgroundColor: "rgba(240,55,157,0.08)",
+  },
+  routeResultHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  routeResultLabel: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.hudText,
+    fontSize: 13,
+  },
+  routeResultScore: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.hudProgressFill,
+    fontSize: 13,
+  },
+  routeResultMeta: {
+    ...fontFamily.kiwiMaruRegular,
+    color: colorTokens.secondary,
+    fontSize: 11,
+  },
+  routeModeRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  routeModeButton: {
+    flex: 1,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colorTokens.primaryForeground,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colorTokens.darkBackground,
+  },
+  routeModeButtonSelected: {
+    backgroundColor: colorTokens.tertiary,
+  },
+  routeModeText: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.tertiary,
+    fontSize: 12,
+  },
+  routeModeTextSelected: {
+    color: colorTokens.primaryForeground,
+  },
+  routeSearchButton: {
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: colorTokens.primaryForeground,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  routeSearchButtonText: {
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.background,
+    fontSize: 15,
+  },
+  mapTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 16,
     paddingRight: 20,
+    gap: 8,
   },
   recenterButton: {
     position: "absolute",
