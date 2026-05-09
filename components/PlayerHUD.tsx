@@ -1,26 +1,77 @@
 import { OutlinedText } from "@/components/OutlinedText";
 import { PencilIcon } from "@/components/icons/PencilIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
-import { colorTokens, fontFamily, fontSize } from "@/constants/tokens";
+import { ApiError } from "@/constants/api";
+import { colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
+import { useAuth } from "@/context/AuthContext";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
-import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const POINTS_MAX = 1000;
 const LEVEL_OUTLINE_SIZE = 4;
+const NICKNAME_MAX_LENGTH = 20;
 
 export default function PlayerHUD() {
   const { nickname, level, xp, xpMax, points } = usePlayerProfile();
+  const { isGuest, updateNickname } = useAuth();
   const progress = xpMax > 0 ? Math.min(xp / xpMax, 1) : 0;
   const levelText = String(level);
   const pointsText = `${points.toLocaleString()}/${POINTS_MAX}`;
 
   const insets = useSafeAreaInsets();
 
+  const [editVisible, setEditVisible] = useState(false);
+  const [draftNickname, setDraftNickname] = useState(nickname);
+  const [submitting, setSubmitting] = useState(false);
+
+  const openEdit = () => {
+    setDraftNickname(nickname);
+    setEditVisible(true);
+  };
+
+  const closeEdit = () => {
+    if (submitting) return;
+    setEditVisible(false);
+  };
+
+  const handleSubmit = async () => {
+    const trimmed = draftNickname.trim();
+    if (!trimmed || submitting) return;
+    if (trimmed === nickname) {
+      setEditVisible(false);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await updateNickname(trimmed);
+      setEditVisible(false);
+    } catch (e) {
+      const message =
+        e instanceof ApiError || e instanceof Error ? e.message : "更新に失敗しました";
+      Alert.alert("更新できませんでした", message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <View pointerEvents="none" style={styles.containerInline}>
-      <View style={[styles.panel, { paddingTop: insets.top }]}>
+    <View pointerEvents="box-none" style={styles.containerInline}>
+      <View pointerEvents="box-none" style={[styles.panel, { paddingTop: insets.top }]}>
         <View style={styles.inner}>
           <View style={styles.avatarRing}>
             <Image
@@ -52,7 +103,16 @@ export default function PlayerHUD() {
               <Text style={styles.nickname} numberOfLines={1} adjustsFontSizeToFit>
                 {nickname}
               </Text>
-              <PencilIcon size={20} color={colorTokens.hudText} />
+              {!isGuest && (
+                <TouchableOpacity
+                  onPress={openEdit}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel="ニックネームを編集"
+                >
+                  <PencilIcon size={20} color={colorTokens.hudText} />
+                </TouchableOpacity>
+              )}
             </View>
 
             <View style={styles.pointsPill}>
@@ -69,6 +129,52 @@ export default function PlayerHUD() {
           </View>
         </View>
       </View>
+
+      <Modal visible={editVisible} transparent animationType="fade" onRequestClose={closeEdit}>
+        <Pressable style={styles.modalOverlay} onPress={closeEdit}>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            <Pressable style={styles.modalCard} onPress={() => {}}>
+              <Text style={styles.modalTitle}>ニックネームを編集</Text>
+              <TextInput
+                style={styles.nicknameInput}
+                value={draftNickname}
+                onChangeText={setDraftNickname}
+                placeholder="ニックネーム"
+                placeholderTextColor={colorTokens.mutedText}
+                autoCorrect={false}
+                maxLength={NICKNAME_MAX_LENGTH}
+                editable={!submitting}
+                autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleSubmit}
+              />
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalCancelBtn}
+                  onPress={closeEdit}
+                  disabled={submitting}
+                >
+                  <Text style={styles.modalCancelText}>キャンセル</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.modalSubmitBtn,
+                    (!draftNickname.trim() || submitting) && styles.modalSubmitBtnDisabled,
+                  ]}
+                  onPress={handleSubmit}
+                  disabled={!draftNickname.trim() || submitting}
+                >
+                  {submitting ? (
+                    <ActivityIndicator color={colorTokens.tertiary} />
+                  ) : (
+                    <Text style={styles.modalSubmitText}>保存</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -217,5 +323,69 @@ const styles = StyleSheet.create({
     ...fontFamily.kiwiMaruMedium,
     color: colorTokens.primaryForeground,
     fontSize: fontSize.minimum,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colorTokens.overlayBackground,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: colorTokens.darkBackground,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: colorTokens.primaryForeground,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  modalTitle: {
+    color: colorTokens.tertiary,
+    fontSize: fontSize.large,
+    ...fontFamily.kiwiMaruMedium,
+  },
+  nicknameInput: {
+    backgroundColor: colorTokens.darkBackground,
+    borderWidth: 1,
+    borderColor: colorTokens.primaryForeground,
+    borderRadius: radius.sm,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.md,
+    color: colorTokens.tertiary,
+    fontSize: fontSize.large,
+    ...fontFamily.kiwiMaruRegular,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    justifyContent: "flex-end",
+  },
+  modalCancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colorTokens.mutedText,
+  },
+  modalCancelText: {
+    color: colorTokens.mutedText,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruMedium,
+  },
+  modalSubmitBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colorTokens.primaryForeground,
+  },
+  modalSubmitBtnDisabled: {
+    backgroundColor: colorTokens.primaryForeground,
+    opacity: 0.5,
+  },
+  modalSubmitText: {
+    color: colorTokens.background,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruMedium,
   },
 });

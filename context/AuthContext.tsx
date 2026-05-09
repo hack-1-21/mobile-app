@@ -35,6 +35,7 @@ type AuthContextValue = AuthState & {
   register: (userId: string, nickname: string, password: string) => Promise<void>;
   loginAsGuest: () => Promise<void>;
   logout: () => Promise<void>;
+  updateNickname: (nickname: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -112,8 +113,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ token: null, user: null, isGuest: false, isLoading: false });
   }, []);
 
+  const updateNickname = useCallback(
+    async (nickname: string) => {
+      const currentUser = state.user;
+      if (!currentUser || state.isGuest) return;
+
+      const updated = await apiFetch<User>(`/users/${currentUser.user_id}`, {
+        method: "PUT",
+        body: JSON.stringify({ nickname }),
+      });
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updated));
+      setState((s) => ({ ...s, user: updated }));
+    },
+    [state.user, state.isGuest],
+  );
+
   return (
-    <AuthContext value={{ ...state, login, register, loginAsGuest, logout }}>
+    <AuthContext value={{ ...state, login, register, loginAsGuest, logout, updateNickname }}>
       {children}
     </AuthContext>
   );
