@@ -1,4 +1,4 @@
-import { colors, radius, spacing } from "@/constants/tokens";
+import { colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -31,25 +31,24 @@ export default function WelcomeScreen() {
       ]}
     >
       <View style={styles.hero}>
+        <Text style={styles.tagline}>あなたの冒険が、誰かの道しるべに。</Text>
         <Text style={styles.title}>SoundReal</Text>
-        <Text style={styles.tagline}>街の音を、地図に刻む。</Text>
       </View>
 
       <View style={styles.actions}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
-
         <Pressable
           style={[styles.btn, styles.btnPrimary]}
-          onPress={() => router.push("/(auth)/login")}
+          onPress={() => router.push("/(auth)/register")}
         >
-          <Text style={styles.btnPrimaryText}>ログイン</Text>
+          <Text style={styles.btnPrimaryText}>新規登録</Text>
         </Pressable>
 
         <Pressable
           style={[styles.btn, styles.btnOutline]}
-          onPress={() => router.push("/(auth)/register")}
+          onPress={() => router.push("/(auth)/login")}
         >
-          <Text style={styles.btnOutlineText}>新規登録</Text>
+          <Text style={styles.btnOutlineText}>ログイン</Text>
         </Pressable>
 
         <View style={styles.divider}>
@@ -64,7 +63,7 @@ export default function WelcomeScreen() {
           disabled={guestLoading}
         >
           {guestLoading ? (
-            <ActivityIndicator color={colors.muted} size="small" />
+            <ActivityIndicator color={colorTokens.mutedText} size="small" />
           ) : (
             <Text style={styles.btnGhostText}>ゲストとして続ける</Text>
           )}
@@ -77,7 +76,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.bgPage,
+    backgroundColor: colorTokens.darkBackground,
     paddingHorizontal: spacing.lg,
     justifyContent: "space-between",
   },
@@ -88,14 +87,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 42,
-    fontWeight: "700",
-    color: colors.primary,
+    color: colorTokens.tertiary,
     letterSpacing: 3,
     marginBottom: spacing.sm,
+    ...fontFamily.kiwiMaruMedium,
   },
   tagline: {
-    fontSize: 15,
-    color: colors.textLightA45,
+    fontSize: fontSize.large,
+    color: colorTokens.mutedText,
+    ...fontFamily.kiwiMaruRegular,
     letterSpacing: 1,
   },
   actions: {
@@ -103,8 +103,9 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   error: {
-    color: "#FF6B6B",
-    fontSize: 13,
+    color: colorTokens.destructive,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
     textAlign: "center",
     marginBottom: spacing.sm,
   },
@@ -114,28 +115,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnPrimary: {
-    backgroundColor: colors.primary,
+    backgroundColor: colorTokens.primaryForeground,
   },
   btnPrimaryText: {
-    color: colors.bgPage,
-    fontWeight: "700",
-    fontSize: 16,
+    color: colorTokens.background,
+    ...fontFamily.kiwiMaruMedium,
+    fontSize: fontSize.large,
   },
   btnOutline: {
     borderWidth: 1,
-    borderColor: colors.primaryA30,
+    borderColor: colorTokens.primaryForeground,
   },
   btnOutlineText: {
-    color: colors.primary,
-    fontWeight: "600",
-    fontSize: 16,
+    color: colorTokens.tertiary,
+    ...fontFamily.kiwiMaruMedium,
+    fontSize: fontSize.large,
   },
   btnGhost: {
-    paddingVertical: 12,
+    paddingVertical: spacing.sm,
   },
   btnGhostText: {
-    color: colors.muted,
-    fontSize: 14,
+    color: colorTokens.mutedText,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
     textAlign: "center",
   },
   divider: {
@@ -147,10 +149,11 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.whiteA10,
+    backgroundColor: colorTokens.mutedText,
   },
   dividerText: {
-    color: colors.muted,
-    fontSize: 12,
+    color: colorTokens.mutedText,
+    fontSize: fontSize.minimum,
+    ...fontFamily.kiwiMaruRegular,
   },
 });

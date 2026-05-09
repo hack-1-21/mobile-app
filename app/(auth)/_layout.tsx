@@ -1,4 +1,4 @@
-import { colors } from "@/constants/tokens";
+import { colorTokens } from "@/constants/tokens";
 import { Stack } from "expo-router";
 
 export default function AuthLayout() {
@@ -6,7 +6,7 @@ export default function AuthLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.bgPage },
+        contentStyle: { backgroundColor: colorTokens.darkBackground },
       }}
     >
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
@@ -16,7 +16,7 @@ export default function AuthLayout() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: colors.primary,
+          headerTintColor: colorTokens.primaryForeground,
         }}
       />
       <Stack.Screen
@@ -25,7 +25,7 @@ export default function AuthLayout() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: colors.primary,
+          headerTintColor: colorTokens.primaryForeground,
         }}
       />
     </Stack>

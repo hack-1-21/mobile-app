@@ -1,5 +1,5 @@
 import { ApiError } from "@/constants/api";
-import { colors, radius, spacing } from "@/constants/tokens";
+import { colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -74,7 +74,7 @@ export default function RegisterScreen() {
             value={nickname}
             onChangeText={setNickname}
             placeholder="表示名"
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={colorTokens.mutedText}
             autoCorrect={false}
           />
 
@@ -84,28 +84,28 @@ export default function RegisterScreen() {
             value={email}
             onChangeText={setEmail}
             placeholder="example@mail.com"
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={colorTokens.mutedText}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
             textContentType="emailAddress"
           />
 
-          <Text style={styles.label}>パスワード</Text>
+          <Text style={styles.label}>パスワード（６文字以上）</Text>
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
               value={password}
               onChangeText={setPassword}
-              placeholder="••••••••（６文字以上）"
-              placeholderTextColor={colors.muted}
+              placeholder="••••••••"
+              placeholderTextColor={colorTokens.mutedText}
               secureTextEntry={!showPassword}
             />
             <Pressable style={styles.passwordToggle} onPress={() => setShowPassword(!showPassword)}>
               <Ionicons
                 name={showPassword ? "eye-off" : "eye"}
                 size={20}
-                color={colors.textLightA45}
+                color={colorTokens.mutedText}
               />
             </Pressable>
           </View>
@@ -116,7 +116,7 @@ export default function RegisterScreen() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={colors.bgPage} />
+              <ActivityIndicator color={colorTokens.background} />
             ) : (
               <Text style={styles.btnPrimaryText}>登録する</Text>
             )}
@@ -124,7 +124,7 @@ export default function RegisterScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Pressable onPress={() => router.back()}>
+          <Pressable onPress={() => router.push("/(auth)/login")}>
             <Text style={styles.link}>ログインはこちら</Text>
           </Pressable>
         </View>
@@ -136,7 +136,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.bgPage,
+    backgroundColor: colorTokens.darkBackground,
   },
   scroll: {
     flexGrow: 1,
@@ -144,15 +144,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: colors.textLight,
+    fontSize: fontSize.maximum,
+    ...fontFamily.kiwiMaruMedium,
+    color: colorTokens.tertiary,
     textAlign: "center",
     marginBottom: spacing.lg * 2,
   },
   error: {
-    color: "#FF6B6B",
-    fontSize: 13,
+    color: colorTokens.destructive,
+    fontSize: fontSize.medium,
+    ...fontFamily.kiwiMaruRegular,
     textAlign: "center",
     marginBottom: spacing.md,
     backgroundColor: "rgba(255,107,107,0.1)",
@@ -165,33 +166,33 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    color: colors.textLightA45,
+    color: colorTokens.mutedText,
     marginBottom: 2,
     marginTop: spacing.sm,
   },
   input: {
-    backgroundColor: colors.bgCard,
+    backgroundColor: colorTokens.darkBackground,
     borderWidth: 1,
-    borderColor: colors.primaryA15,
+    borderColor: colorTokens.primaryForeground,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
-    color: colors.textLight,
+    color: colorTokens.tertiary,
     fontSize: 15,
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.bgCard,
+    backgroundColor: colorTokens.darkBackground,
     borderWidth: 1,
-    borderColor: colors.primaryA15,
+    borderColor: colorTokens.primaryForeground,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
   },
   passwordInput: {
     flex: 1,
     paddingVertical: 14,
-    color: colors.textLight,
+    color: colorTokens.tertiary,
     fontSize: 15,
   },
   passwordToggle: {
@@ -204,28 +205,29 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   btnPrimary: {
-    backgroundColor: colors.primary,
+    backgroundColor: colorTokens.primaryForeground,
   },
   btnPrimaryText: {
-    color: colors.bgPage,
-    fontWeight: "700",
+    color: colorTokens.background,
+    ...fontFamily.kiwiMaruMedium,
     fontSize: 15,
   },
   btnOutline: {
     borderWidth: 1,
-    borderColor: colors.primaryA30,
+    borderColor: colorTokens.primaryForeground,
   },
   btnOutlineText: {
-    color: colors.primary,
-    fontWeight: "600",
-    fontSize: 15,
+    color: colorTokens.tertiary,
+    ...fontFamily.kiwiMaruMedium,
+    fontSize: fontSize.medium,
   },
   footer: {
     marginTop: spacing.lg * 1.5,
     alignItems: "center",
   },
   link: {
-    color: colors.primary,
+    color: colorTokens.tertiary,
+    ...fontFamily.kiwiMaruMedium,
     fontSize: 14,
   },
 });
