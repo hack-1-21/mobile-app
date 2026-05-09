@@ -1,7 +1,7 @@
 import { StarIcon } from "@/components/icons/StarIcon";
 import { StarLineIcon } from "@/components/icons/StarLineIcon";
 import PlayerHUD from "@/components/PlayerHUD";
-import { colorTokens, fontFamily, fontSize } from "@/constants/tokens";
+import { colorTokens, fontFamily, fontSize, radius } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { Image } from "expo-image";
@@ -33,22 +33,29 @@ export default function Hakoniwa() {
       <PlayerHUD />
 
       <View style={styles.imageContainer}>
-        <View style={styles.starLinesContainer}>
-          <StarLineIcon
-            size={36}
-            fillColor={stage >= 1 ? colorTokens.hudProgressFill : colorTokens.hakoniwaBorder}
-            strokeColor={colorTokens.hakoniwaBorder}
-          />
-          <StarLineIcon
-            size={36}
-            fillColor={stage >= 2 ? colorTokens.hudProgressFill : colorTokens.mutedText}
-            strokeColor={colorTokens.hakoniwaBorder}
-          />
-          <StarLineIcon
-            size={36}
-            fillColor={stage >= 3 ? colorTokens.hudProgressFill : colorTokens.mutedText}
-            strokeColor={colorTokens.hakoniwaBorder}
-          />
+        <View style={styles.titleContainer}>
+          <View style={[styles.frameDecoration, styles.frameDecoration1]} />
+          <View style={[styles.frameDecoration, styles.frameDecoration2]} />
+          <View style={[styles.frameDecoration, styles.frameDecoration3]} />
+          <View style={[styles.frameDecoration, styles.frameDecoration4]} />
+
+          <View style={styles.starLinesContainer}>
+            <StarLineIcon
+              size={36}
+              fillColor={stage >= 1 ? colorTokens.hudProgressFill : colorTokens.hakoniwaBorder}
+              strokeColor={colorTokens.hakoniwaBorder}
+            />
+            <StarLineIcon
+              size={36}
+              fillColor={stage >= 2 ? colorTokens.hudProgressFill : colorTokens.mutedText}
+              strokeColor={colorTokens.hakoniwaBorder}
+            />
+            <StarLineIcon
+              size={36}
+              fillColor={stage >= 3 ? colorTokens.hudProgressFill : colorTokens.mutedText}
+              strokeColor={colorTokens.hakoniwaBorder}
+            />
+          </View>
         </View>
         <Image
           source={{ uri: imageSource }}
@@ -88,6 +95,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colorTokens.darkBackground,
   },
+  titleContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colorTokens.tertiary,
+    borderRadius: radius.md,
+    borderWidth: 5,
+    borderColor: colorTokens.hakoniwaBorder,
+    paddingHorizontal: 20,
+    paddingVertical: 2,
+    alignSelf: "center",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    position: "relative",
+    marginBottom: 10,
+  },
+  frameDecoration: {
+    position: "absolute",
+    width: 10,
+    height: 10,
+    backgroundColor: colorTokens.hakoniwaBorder,
+    borderRadius: 50,
+  },
+  frameDecoration1: {
+    top: -2,
+    left: -2,
+  },
+  frameDecoration2: {
+    top: -2,
+    right: -2,
+  },
+  frameDecoration3: {
+    bottom: -2,
+    left: -2,
+  },
+  frameDecoration4: {
+    bottom: -2,
+    right: -2,
+  },
   imageContainer: {
     flex: 1,
     alignItems: "center",
@@ -113,9 +160,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colorTokens.tertiary,
     borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 6,
-    marginBottom: 14,
   },
   pointsContainer: {
     paddingHorizontal: 16,
