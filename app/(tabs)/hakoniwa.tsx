@@ -4,7 +4,8 @@ import PlayerHUD from "@/components/PlayerHUD";
 import { colorTokens, fontFamily, fontSize } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { StyleSheet, Text, View } from "react-native";
 
 const POINTS_MAX = 1000;
 const POINTS_OUTLINE_SIZE = 2;
@@ -13,6 +14,12 @@ const STAGE_2_POINTS = 400;
 const STAGE_3_POINTS = 800;
 
 const IMAGE_BASE_URL = "https://server-production-5adf.up.railway.app/images/gardens";
+
+const GARDEN_IMAGE_PLACEHOLDER = {
+  blurhash: "LGF5]+Yk^6#M@-5c,1J5@[or[Q6",
+  width: 32,
+  height: 32,
+} as const;
 
 export default function Hakoniwa() {
   const { user } = useAuth();
@@ -27,11 +34,31 @@ export default function Hakoniwa() {
 
       <View style={styles.imageContainer}>
         <View style={styles.starLinesContainer}>
-          <StarLineIcon size={36} fillColor={stage >= 1 ? colorTokens.hudProgressFill : colorTokens.hakoniwaBorder} strokeColor={colorTokens.hakoniwaBorder} />
-          <StarLineIcon size={36} fillColor={stage >= 2 ? colorTokens.hudProgressFill : colorTokens.mutedText} strokeColor={colorTokens.hakoniwaBorder} />
-          <StarLineIcon size={36} fillColor={stage >= 3 ? colorTokens.hudProgressFill : colorTokens.mutedText} strokeColor={colorTokens.hakoniwaBorder} />
+          <StarLineIcon
+            size={36}
+            fillColor={stage >= 1 ? colorTokens.hudProgressFill : colorTokens.hakoniwaBorder}
+            strokeColor={colorTokens.hakoniwaBorder}
+          />
+          <StarLineIcon
+            size={36}
+            fillColor={stage >= 2 ? colorTokens.hudProgressFill : colorTokens.mutedText}
+            strokeColor={colorTokens.hakoniwaBorder}
+          />
+          <StarLineIcon
+            size={36}
+            fillColor={stage >= 3 ? colorTokens.hudProgressFill : colorTokens.mutedText}
+            strokeColor={colorTokens.hakoniwaBorder}
+          />
         </View>
-        <Image source={{ uri: imageSource }} style={styles.image} />
+        <Image
+          source={{ uri: imageSource }}
+          style={styles.image}
+          contentFit="cover"
+          placeholder={GARDEN_IMAGE_PLACEHOLDER}
+          placeholderContentFit="cover"
+          transition={220}
+          cachePolicy="disk"
+        />
         <View style={styles.pointsContainer}>
           <View style={styles.pointsRow}>
             <View style={styles.pointsBubble}>
@@ -71,7 +98,6 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    resizeMode: "cover",
     maxWidth: "100%",
     maxHeight: "100%",
     borderRadius: 30,
