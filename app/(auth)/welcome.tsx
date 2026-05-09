@@ -1,5 +1,6 @@
 import { colorTokens, fontFamily, fontSize, radius, spacing } from "@/constants/tokens";
 import { useAuth } from "@/context/AuthContext";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
@@ -23,6 +24,8 @@ export default function WelcomeScreen() {
     }
   };
 
+  const logoSource = require("../../assets/logo.png");
+
   return (
     <View
       style={[
@@ -32,7 +35,12 @@ export default function WelcomeScreen() {
     >
       <View style={styles.hero}>
         <Text style={styles.tagline}>あなたの冒険が、誰かの道しるべに。</Text>
-        <Text style={styles.title}>SoundReal</Text>
+        <Image
+          source={logoSource}
+          style={styles.logo}
+          contentFit="contain"
+          cachePolicy={"disk"}
+        />
       </View>
 
       <View style={styles.actions}>
@@ -84,6 +92,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    gap: 16,
+  },
+  logo: {
+    width: "80%",
+    height: 100,
   },
   title: {
     fontSize: 42,

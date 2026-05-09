@@ -621,6 +621,7 @@ export default function App() {
         )}
         <View style={{ marginLeft: "auto" }}>
           <MapMenuPill
+            isFullscreen={fullscreen}
             expanded={menuExpanded}
             onToggle={() => setMenuExpanded((v) => !v)}
             onFullscreen={() => {

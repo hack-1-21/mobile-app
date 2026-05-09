@@ -2,8 +2,8 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: config.name ?? "sound-real",
-  slug: config.slug ?? "sound-real",
+  name: config.name ?? "おとにわ",
+  slug: config.slug ?? "otoniwa",
   ios: {
     ...config.ios,
     config: {

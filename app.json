@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Sound Real",
-    "slug": "sound-real",
+    "name": "おとにわ",
+    "slug": "otoniwa",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "soundreal",
+    "scheme": "otoniwa",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

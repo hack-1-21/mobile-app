@@ -3,10 +3,12 @@ import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, TouchableOpacity } from "react-native";
 import { FullscreenIcon } from "./icons/FullscreenIcon";
 import { MenuIcon } from "./icons/MenuIcon";
+import { MinimizeIcon } from "./icons/MinimizeIcon";
 import { WrenchIcon } from "./icons/WrenchIcon";
 
 type Props = {
   expanded: boolean;
+  isFullscreen: boolean;
   onToggle: () => void;
   onFullscreen: () => void;
   onCustomize: () => void;
@@ -16,7 +18,7 @@ const SECTION = 64;
 const COLLAPSED_HEIGHT = SECTION;
 const EXPANDED_HEIGHT = SECTION * 3;
 
-export default function MapMenuPill({ expanded, onToggle, onFullscreen, onCustomize }: Props) {
+export default function MapMenuPill({ expanded, isFullscreen, onToggle, onFullscreen, onCustomize }: Props) {
   const heightAnim = useRef(new Animated.Value(COLLAPSED_HEIGHT)).current;
   const itemOpacity = useRef(new Animated.Value(0)).current;
 
@@ -46,7 +48,7 @@ export default function MapMenuPill({ expanded, onToggle, onFullscreen, onCustom
         pointerEvents={expanded ? "auto" : "none"}
       >
         <TouchableOpacity style={[styles.section, styles.sectionButton]} onPress={onFullscreen} activeOpacity={0.7}>
-          <FullscreenIcon size={28} color={colorTokens.tertiary} />
+          {isFullscreen ? <MinimizeIcon size={28} color={colorTokens.tertiary} /> : <FullscreenIcon size={28} color={colorTokens.tertiary} />}
         </TouchableOpacity>
         <TouchableOpacity style={[styles.section, styles.sectionButton]} onPress={onCustomize} activeOpacity={0.7}>
           <WrenchIcon size={28} color={colorTokens.tertiary} />
