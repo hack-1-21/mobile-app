@@ -1,4 +1,5 @@
 import { colorTokens, fontSize, shadowStyles } from "@/constants/tokens";
+import { useAuth } from "@/context/AuthContext";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
@@ -21,6 +22,7 @@ type TabItemProps = {
   tab: string;
   isActive: boolean;
   onPress: () => void;
+  disabled?: boolean;
 };
 
 function TabIcon({ type, isActive }: { type: string; isActive: boolean }) {
@@ -66,11 +68,16 @@ function TabSeparator({ gradientId }: { gradientId: string }) {
   );
 }
 
-function TabItem({ label, tab, isActive, onPress }: TabItemProps) {
+function TabItem({ label, tab, isActive, onPress, disabled }: TabItemProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.tabPressable, isActive ? styles.tabItemActive : null]}
+      disabled={disabled}
+      style={[
+        styles.tabPressable,
+        isActive ? styles.tabItemActive : null,
+        disabled ? styles.tabItemDisabled : null,
+      ]}
     >
       <View style={styles.tabItem}>
         <View style={[styles.tabIcon, isActive ? styles.tabIconActive : null]}>
@@ -86,6 +93,7 @@ function TabItem({ label, tab, isActive, onPress }: TabItemProps) {
 
 export function GameTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const { isGuest } = useAuth();
 
   return (
     <View style={[styles.wrapper, { paddingBottom: insets.bottom }]}>
@@ -103,6 +111,7 @@ export function GameTabBar({ state, descriptors, navigation }: BottomTabBarProps
                   label={label}
                   tab={route.name}
                   isActive={isActive}
+                  disabled={isGuest && route.name !== "index" && route.name !== "settings"}
                   onPress={() => {
                     const event = navigation.emit({
                       type: "tabPress",
@@ -185,5 +194,8 @@ const styles = StyleSheet.create({
   },
   tabLabelInactive: {
     color: colorTokens.tertiary,
+  },
+  tabItemDisabled: {
+    opacity: 0.5,
   },
 });
