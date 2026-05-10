@@ -18,7 +18,13 @@ const SECTION = 64;
 const COLLAPSED_HEIGHT = SECTION;
 const EXPANDED_HEIGHT = SECTION * 3;
 
-export default function MapMenuPill({ expanded, isFullscreen, onToggle, onFullscreen, onCustomize }: Props) {
+export default function MapMenuPill({
+  expanded,
+  isFullscreen,
+  onToggle,
+  onFullscreen,
+  onCustomize,
+}: Props) {
   const heightAnim = useRef(new Animated.Value(COLLAPSED_HEIGHT)).current;
   const itemOpacity = useRef(new Animated.Value(0)).current;
 
@@ -47,10 +53,22 @@ export default function MapMenuPill({ expanded, isFullscreen, onToggle, onFullsc
         style={[styles.expandableArea, { opacity: itemOpacity }]}
         pointerEvents={expanded ? "auto" : "none"}
       >
-        <TouchableOpacity style={[styles.section, styles.sectionButton]} onPress={onFullscreen} activeOpacity={0.7}>
-          {isFullscreen ? <MinimizeIcon size={28} color={colorTokens.tertiary} /> : <FullscreenIcon size={28} color={colorTokens.tertiary} />}
+        <TouchableOpacity
+          style={[styles.section, styles.sectionButton]}
+          onPress={onFullscreen}
+          activeOpacity={0.7}
+        >
+          {isFullscreen ? (
+            <MinimizeIcon size={28} color={colorTokens.tertiary} />
+          ) : (
+            <FullscreenIcon size={28} color={colorTokens.tertiary} />
+          )}
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.section, styles.sectionButton]} onPress={onCustomize} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={[styles.section, styles.sectionButton]}
+          onPress={onCustomize}
+          activeOpacity={0.7}
+        >
           <WrenchIcon size={28} color={colorTokens.tertiary} />
         </TouchableOpacity>
       </Animated.View>

@@ -1,14 +1,6 @@
 import { colors, colorTokens, radius } from "@/constants/tokens";
 import React, { useEffect, useRef } from "react";
-import {
-  Animated,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import HourRangeSlider from "./HourRangeSlider";
 
 export type MapOptions = {

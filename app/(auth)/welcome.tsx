@@ -35,12 +35,7 @@ export default function WelcomeScreen() {
     >
       <View style={styles.hero}>
         <Text style={styles.tagline}>あなたの冒険が、誰かの道しるべに。</Text>
-        <Image
-          source={logoSource}
-          style={styles.logo}
-          contentFit="contain"
-          cachePolicy={"disk"}
-        />
+        <Image source={logoSource} style={styles.logo} contentFit="contain" cachePolicy={"disk"} />
       </View>
 
       <View style={styles.actions}>

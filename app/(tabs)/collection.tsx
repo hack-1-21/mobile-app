@@ -93,7 +93,13 @@ export default function Collection() {
                     <TouchableOpacity
                       onPress={handlePreviousItem}
                       disabled={selectedIndex === null || selectedIndex <= 0}
-                      style={[styles.detailArrowButton, selectedIndex === null || selectedIndex <= 0 ? styles.detailArrowButtonDisabled : styles.detailArrowButtonActive, styles.detailArrowButtonLeft]}
+                      style={[
+                        styles.detailArrowButton,
+                        selectedIndex === null || selectedIndex <= 0
+                          ? styles.detailArrowButtonDisabled
+                          : styles.detailArrowButtonActive,
+                        styles.detailArrowButtonLeft,
+                      ]}
                       activeOpacity={0.7}
                     >
                       <PrevArrowIcon
@@ -108,14 +114,20 @@ export default function Collection() {
                     <Image
                       source={{ uri: `${IMAGE_BASE_URL}${selectedItem.image_url}` }}
                       style={styles.detailImage}
-                      cachePolicy={"none"}
+                      cachePolicy={"memory"}
                     />
                     <TouchableOpacity
                       onPress={handleNextItem}
                       disabled={
                         selectedIndex === null || selectedIndex >= collectionData.length - 1
                       }
-                      style={[styles.detailArrowButton, selectedIndex === null || selectedIndex >= collectionData.length - 1 ? styles.detailArrowButtonDisabled : styles.detailArrowButtonActive, styles.detailArrowButtonRight]}
+                      style={[
+                        styles.detailArrowButton,
+                        selectedIndex === null || selectedIndex >= collectionData.length - 1
+                          ? styles.detailArrowButtonDisabled
+                          : styles.detailArrowButtonActive,
+                        styles.detailArrowButtonRight,
+                      ]}
                       activeOpacity={0.7}
                     >
                       <NextArrowIcon
@@ -157,7 +169,7 @@ export default function Collection() {
                               <Image
                                 source={{ uri: `${IMAGE_BASE_URL}${item.image_url}` }}
                                 style={styles.collectionImage}
-                                cachePolicy={"none"}
+                                cachePolicy={"memory"}
                               />
                             ) : (
                               <PlusIcon size={28} color={colorTokens.blueToneDown} />
@@ -343,7 +355,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    position: "relative"
+    position: "relative",
   },
   detailArrowButton: {
     position: "absolute",

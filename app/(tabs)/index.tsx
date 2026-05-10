@@ -12,7 +12,14 @@ import { useAuth } from "@/context/AuthContext";
 import { useTiledSoundData } from "@/hooks/useTiledSoundData";
 import * as Location from "expo-location";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import MapView, { Marker, Polygon, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ClipPath, Defs, G, Path, Svg } from "react-native-svg";
@@ -103,8 +110,14 @@ export default function App() {
   const [fullscreen, setFullscreen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [routeSearchVisible, setRouteSearchVisible] = useState(false);
-  const [routeOrigin, setRouteOrigin] = useState<PlaceSelection>({ label: "現在地", location: null });
-  const [routeDestination, setRouteDestination] = useState<PlaceSelection>({ label: "", location: null });
+  const [routeOrigin, setRouteOrigin] = useState<PlaceSelection>({
+    label: "現在地",
+    location: null,
+  });
+  const [routeDestination, setRouteDestination] = useState<PlaceSelection>({
+    label: "",
+    location: null,
+  });
   const [routeMode, setRouteMode] = useState<"quiet" | "balanced" | "fast">("quiet");
   const [routeResults, setRouteResults] = useState<QuietRouteCandidate[] | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
@@ -163,6 +176,20 @@ export default function App() {
 
   const currentSizeRef = useRef(INITIAL_CELL_SIZE);
   const mapRef = useRef<MapView>(null);
+  const [renderToken, setRenderToken] = useState(0);
+  const prevGridLenRef = useRef(0);
+
+  // react-native-maps の既知の挙動回避: MapView マウント後に追加された Polygon が
+  // ユーザー操作まで描画されないため、grid が 0 → 非ゼロに変化したタイミングで
+  // renderToken をインクリメントし、Polygon の key を変えて強制 remount する。
+  // mode 切替時 (公開↔探索) の再発もこれでカバーできる。
+  useEffect(() => {
+    const prev = prevGridLenRef.current;
+    prevGridLenRef.current = grid.length;
+    if (prev === 0 && grid.length > 0) {
+      setRenderToken((t) => t + 1);
+    }
+  }, [grid.length]);
 
   useEffect(() => {
     let sub: Location.LocationSubscription | undefined;
@@ -415,7 +442,7 @@ export default function App() {
             showsGradientGrid &&
             visibleGrid.map((cell) => (
               <HexPolygon
-                key={cell.key}
+                key={`${cell.key}-${renderToken}`}
                 centerLat={cell.centerLat}
                 centerLng={cell.centerLng}
                 cellSize={cellSize}
@@ -425,7 +452,7 @@ export default function App() {
             ))}
           {boundaryEdges.map((edge) => (
             <Polyline
-              key={edge.key}
+              key={`${edge.key}-${renderToken}`}
               coordinates={edge.coords}
               strokeColor={colorTokens.primary}
               strokeWidth={2}
@@ -506,7 +533,12 @@ export default function App() {
                 placeholder="現在地"
                 prefixOptions={
                   userCoords
-                    ? [{ label: "現在地", location: { lat: userCoords.latitude, lng: userCoords.longitude } }]
+                    ? [
+                        {
+                          label: "現在地",
+                          location: { lat: userCoords.latitude, lng: userCoords.longitude },
+                        },
+                      ]
                     : []
                 }
               />
@@ -535,12 +567,7 @@ export default function App() {
                     onPress={() => setRouteMode(value as "quiet" | "balanced" | "fast")}
                     accessibilityRole="button"
                   >
-                    <Text
-                      style={[
-                        styles.routeModeText,
-                        selected && styles.routeModeTextSelected,
-                      ]}
-                    >
+                    <Text style={[styles.routeModeText, selected && styles.routeModeTextSelected]}>
                       {label}
                     </Text>
                   </Pressable>

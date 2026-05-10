@@ -183,7 +183,7 @@ export default function Settings() {
       >
         <Pressable style={styles.modalOverlay} onPress={handlePairingCancel}>
           <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <Pressable style={styles.modalCard} onPress={() => { }}>
+            <Pressable style={styles.modalCard} onPress={() => {}}>
               <Text style={styles.modalTitle}>スマートウォッチを連携</Text>
               <Text style={styles.modalSubtitle}>
                 デバイスに表示されているペアリングコードを入力してください
@@ -211,7 +211,7 @@ export default function Settings() {
                   style={[
                     styles.modalSubmitBtn,
                     (!normalizedPairingCode || isSubmittingPairing) &&
-                    styles.modalSubmitBtnDisabled,
+                      styles.modalSubmitBtnDisabled,
                   ]}
                   onPress={handlePairingSubmit}
                   disabled={!normalizedPairingCode || isSubmittingPairing}
@@ -235,9 +235,7 @@ export default function Settings() {
           <View style={styles.deviceSection}>
             <View style={styles.deviceConnectContainer}>
               <Text style={styles.labelText}>スマートウォッチ連携</Text>
-              <TouchableOpacity
-                onPress={() => setPairingModalVisible(true)}
-              >
+              <TouchableOpacity onPress={() => setPairingModalVisible(true)}>
                 <LinearGradient
                   colors={[colorTokens.primaryForeground, colorTokens.secondary]}
                   start={{ x: 1, y: 0 }}
