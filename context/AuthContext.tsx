@@ -53,10 +53,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
       const isGuest = (await SecureStore.getItemAsync(GUEST_KEY)) === "true";
       const userJson = await SecureStore.getItemAsync(USER_KEY);
-      if (userJson && (token || isGuest)) {
-        setState({ token, user: JSON.parse(userJson) as User, isGuest, isLoading: false });
-      } else {
+      if (!userJson || (!token && !isGuest)) {
         setState((s) => ({ ...s, isLoading: false }));
+        return;
+      }
+
+      const cachedUser = JSON.parse(userJson) as User;
+      setState({ token, user: cachedUser, isGuest, isLoading: false });
+
+      if (token && !isGuest && cachedUser.user_id) {
+        try {
+          const fresh = await apiFetch<User>(`/users/${cachedUser.user_id}`);
+          await SecureStore.setItemAsync(USER_KEY, JSON.stringify(fresh));
+          setState((s) => ({ ...s, user: fresh }));
+        } catch {
+          // ネットワーク失敗時はキャッシュをそのまま使う
+        }
       }
     })();
   }, []);

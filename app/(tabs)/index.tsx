@@ -139,21 +139,31 @@ export default function App() {
     region,
     showsExplorationMap ? user?.user_id || null : null,
   );
-  const filteredPublicSoundData = useMemo(() => {
+  const filterByTimeRange = useMemo(() => {
     const [startHour, endHour] = mapOptions.timeRange;
-    if (startHour <= 0 && endHour >= 24) return publicSoundData;
-    return publicSoundData.filter((p) => {
-      const hour = new Date(p.created_at).getHours();
-      return hour >= startHour && hour < endHour;
-    });
-  }, [publicSoundData, mapOptions.timeRange]);
+    return <T extends { created_at: string }>(data: T[]): T[] => {
+      if (startHour <= 0 && endHour >= 24) return data;
+      return data.filter((p) => {
+        const hour = new Date(p.created_at).getHours();
+        return hour >= startHour && hour < endHour;
+      });
+    };
+  }, [mapOptions.timeRange]);
+  const filteredPublicSoundData = useMemo(
+    () => filterByTimeRange(publicSoundData),
+    [publicSoundData, filterByTimeRange],
+  );
+  const filteredExplorationSoundData = useMemo(
+    () => filterByTimeRange(explorationSoundData),
+    [explorationSoundData, filterByTimeRange],
+  );
   const publicGrid = useMemo(
     () => buildHexGrid(filteredPublicSoundData, cellSize),
     [filteredPublicSoundData, cellSize],
   );
   const explorationGrid = useMemo(
-    () => buildHexGrid(explorationSoundData, cellSize),
-    [explorationSoundData, cellSize],
+    () => buildHexGrid(filteredExplorationSoundData, cellSize),
+    [filteredExplorationSoundData, cellSize],
   );
   const grid = showsExplorationMap ? explorationGrid : publicGrid;
 
