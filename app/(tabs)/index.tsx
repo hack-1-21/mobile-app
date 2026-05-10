@@ -95,6 +95,7 @@ const HexPolygon = React.memo(function HexPolygon({
       fillColor={weightToColor(weight)}
       strokeWidth={0.5}
       strokeColor={strokeColor}
+      zIndex={1}
     />
   );
 });
@@ -436,6 +437,7 @@ export default function App() {
               fillColor={colors.fogFill}
               strokeWidth={0}
               strokeColor="transparent"
+              zIndex={1}
             />
           )}
           {mapOptions.showHexGrid &&
@@ -456,6 +458,7 @@ export default function App() {
               coordinates={edge.coords}
               strokeColor={colorTokens.primary}
               strokeWidth={2}
+              zIndex={2}
             />
           ))}
           {routeResults && routeResults[selectedRouteIdx] && (
@@ -470,6 +473,7 @@ export default function App() {
               lineCap="round"
               lineJoin="round"
               tappable={false}
+              zIndex={1000}
             />
           )}
         </MapView>
